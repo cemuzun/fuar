@@ -201,69 +201,73 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Main View Switcher Navigation Tab Bar */}
       {onViewChange && (
         <div className="bg-slate-100/80 border-t border-slate-200 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto flex items-center space-x-2 py-1.5">
-            <button
-              onClick={() => onViewChange('shows')}
-              className={`px-4 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
-                activeView === 'shows'
-                  ? 'bg-white text-blue-700 shadow-xs border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              <Building2 className="w-4 h-4 text-blue-600" />
-              <span>Trade Shows & Exhibitors Directory</span>
-              <span className="bg-blue-50 text-blue-700 px-2 py-0.2 text-[10px] rounded-full font-extrabold border border-blue-200">
-                {totalExhibitors}
-              </span>
-            </button>
+          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 py-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                onClick={() => onViewChange('shows')}
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
+                  activeView === 'shows'
+                    ? 'bg-white text-blue-700 shadow-xs border border-slate-200'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                }`}
+              >
+                <Building2 className="w-4 h-4 text-blue-600" />
+                <span>Trade Shows & Exhibitors Directory</span>
+                <span className="bg-blue-50 text-blue-700 px-2 py-0.2 text-[10px] rounded-full font-extrabold border border-blue-200">
+                  {totalExhibitors}
+                </span>
+              </button>
 
-            <button
-              onClick={() => onViewChange('leads')}
-              className={`px-4 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
-                activeView === 'leads'
-                  ? 'bg-white text-blue-700 shadow-xs border border-slate-200'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              <Users className="w-4 h-4 text-emerald-600" />
-              <span>Leads & Decision Maker Page</span>
-              <span className="bg-emerald-50 text-emerald-700 px-2 py-0.2 text-[10px] rounded-full font-extrabold border border-emerald-200">
-                {decisionMakersCount} Leads
-              </span>
-            </button>
+              <button
+                onClick={() => onViewChange('leads')}
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
+                  activeView === 'leads'
+                    ? 'bg-white text-blue-700 shadow-xs border border-slate-200'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                }`}
+              >
+                <Users className="w-4 h-4 text-emerald-600" />
+                <span>Leads & Decision Maker Page</span>
+                <span className="bg-emerald-50 text-emerald-700 px-2 py-0.2 text-[10px] rounded-full font-extrabold border border-emerald-200">
+                  {decisionMakersCount} Leads
+                </span>
+              </button>
 
-            <button
-              onClick={() => onViewChange('inbox')}
-              className={`px-4 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
-                activeView === 'inbox'
-                  ? 'bg-slate-900 text-white shadow-xs border border-slate-800'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              <Mail className={`w-4 h-4 ${activeView === 'inbox' ? 'text-blue-400' : 'text-blue-600'}`} />
-              <span>Mailbox ({userEmail.split('@')[0]})</span>
-              <span className={`px-2 py-0.2 text-[10px] rounded-full font-extrabold border ${
-                activeView === 'inbox'
-                  ? 'bg-blue-500 text-white border-blue-400'
-                  : 'bg-blue-50 text-blue-700 border-blue-200'
-              }`}>
-                {unreadEmailCount > 0 ? `${unreadEmailCount} Unread` : 'Inbox Active'}
-              </span>
-            </button>
-            <button
-              onClick={() => onViewChange && onViewChange('scraper-debug')}
-              className={`px-4 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
-                activeView === 'scraper-debug'
-                  ? 'bg-slate-900 text-white shadow-xs border border-slate-800'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              <Bug className={`w-4 h-4 ${activeView === 'scraper-debug' ? 'text-amber-400' : 'text-amber-600'}`} />
-              <span>Debug Logs</span>
-            </button>
+              <button
+                onClick={() => onViewChange('inbox')}
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
+                  activeView === 'inbox'
+                    ? 'bg-slate-900 text-white shadow-xs border border-slate-800'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                }`}
+              >
+                <Mail className={`w-4 h-4 ${activeView === 'inbox' ? 'text-blue-400' : 'text-blue-600'}`} />
+                <span>Mailbox ({userEmail.split('@')[0]})</span>
+                <span className={`px-2 py-0.2 text-[10px] rounded-full font-extrabold border ${
+                  activeView === 'inbox'
+                    ? 'bg-blue-500 text-white border-blue-400'
+                    : 'bg-blue-50 text-blue-700 border-blue-200'
+                }`}>
+                  {unreadEmailCount > 0 ? `${unreadEmailCount} Unread` : 'Inbox Active'}
+                </span>
+              </button>
+
+              <button
+                onClick={() => onViewChange && onViewChange('scraper-debug')}
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
+                  activeView === 'scraper-debug'
+                    ? 'bg-slate-900 text-white shadow-xs border border-slate-800'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                }`}
+              >
+                <Bug className={`w-4 h-4 ${activeView === 'scraper-debug' ? 'text-amber-400' : 'text-amber-600'}`} />
+                <span>Debug Logs</span>
+              </button>
+            </div>
+
             <button
               onClick={onOpenSettings}
-              className="ml-auto px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-slate-800 text-white hover:bg-slate-700 shadow-xs cursor-pointer"
+              className="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-slate-800 text-white hover:bg-slate-700 shadow-xs cursor-pointer shrink-0"
               title="Configure lead time cutoff, email settings, & metrics"
             >
               <Settings className="w-4 h-4 text-amber-400" />
