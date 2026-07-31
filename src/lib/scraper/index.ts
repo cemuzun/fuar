@@ -7,6 +7,8 @@ import { chromium, Page, Browser } from 'playwright';
 import { ScraperAdapter, ExhibitorData } from './types.js';
 import { MapYourShowAdapter } from './adapters/mapyourshow.js';
 import { GenericDeterministicAdapter } from './adapters/generic-deterministic.js';
+import * as fsLib from 'fs';
+import * as pathLib from 'path';
 
 const adapters: ScraperAdapter[] = [
   new MapYourShowAdapter(),
@@ -56,14 +58,13 @@ export class DirectoryScraper {
   }
 
   async scrape(url: string, tradeShowName: string, city: string, state: string, runGeminiFallback: (candidates: string[]) => Promise<ExhibitorData[]>): Promise<{ exhibitors: ExhibitorData[], diagnostics?: any }> {
-    console.log(`Starting Playwright extraction for ${url}`);
+    console.log(`[Scraper] Starting extraction for: ${url}`);
     const checkpoint = await this.loadCheckpoint(url);
     if (checkpoint && checkpoint.status === 'completed') {
-       console.log('Returning from checkpoint');
+       console.log('[Scraper] Returning cached checkpoint result');
        return { exhibitors: checkpoint.exhibitors, diagnostics: checkpoint.diagnostics };
     }
 
-    
     let browser: Browser | null = null;
     let page: Page | null = null;
     let htmlText = '';
@@ -72,28 +73,56 @@ export class DirectoryScraper {
     try {
       browser = await chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] });
       page = await browser.newPage();
+
+      // Set a realistic browser UA to reduce bot detection blocks
+      await page.setExtraHTTPHeaders({
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      });
       
+      // Intercept XHR/fetch responses — raised cap to 200 to capture paginated API calls
       page.on('response', async (response) => {
         const req = response.request();
         if (req.resourceType() === 'fetch' || req.resourceType() === 'xhr') {
-          if (response.url().includes('mapyourshow') || response.url().includes('api') || response.url().includes('json') || response.url().includes('graphql') || response.url().includes('marketplace')) {
+          if (response.url().includes('mapyourshow') || response.url().includes('api') || response.url().includes('json') || response.url().includes('graphql') || response.url().includes('marketplace') || response.url().includes('exhibitor')) {
             try {
               const json = await response.json();
-              if (interceptedXhr.length < 50) { interceptedXhr.push({ url: response.url(), json }); }
+              if (interceptedXhr.length < 200) {
+                interceptedXhr.push({ url: response.url(), json });
+                console.log(`[Scraper] XHR intercepted (#${interceptedXhr.length}): ${response.url().substring(0, 80)}`);
+              }
             } catch (e) {
-              // Ignore non-json parsing errors
+              // Ignore non-json responses
             }
           }
         }
       });
-      
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
-      // wait a bit for js to execute
+
+      // Use networkidle for SPA sites (React/Vue trade show directories) with generous timeout
+      try {
+        await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
+      } catch (e) {
+        // networkidle timed out — fall back to domcontentloaded + extra wait
+        console.warn(`[Scraper] networkidle timed out for ${url}, falling back`);
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForTimeout(5000);
+      }
+
+      // Extra wait for lazy-loaded content
       await page.waitForTimeout(3000);
       htmlText = await page.content();
+      console.log(`[Scraper] Page loaded, HTML size: ${htmlText.length} bytes, XHRs intercepted: ${interceptedXhr.length}`);
+
+      // Save raw HTML to disk for debugging
+      const safeUrl = url.replace(/[^a-z0-9]/gi, '_').substring(0, 50).toLowerCase();
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const logDir = pathLib.join(process.cwd(), 'logs');
+      if (!fsLib.existsSync(logDir)) fsLib.mkdirSync(logDir, { recursive: true });
+      fsLib.writeFileSync(pathLib.join(logDir, `scrape_${safeUrl}_${timestamp}.html`), htmlText);
+      console.log(`[Scraper] Raw HTML saved to logs/scrape_${safeUrl}_${timestamp}.html`);
       
     } catch (e: any) {
-      console.error(`Playwright error for ${url}:`, e);
+      console.error(`[Scraper] Playwright error for ${url}:`, e.message);
       if (browser) await browser.close();
       return { exhibitors: [{ companyName: 'blocked', sourceUrl: url, sourceEvidence: e.message, extractionMethod: 'deterministic', confidence: 0, boothNumber: null, profileUrl: null, companyWebsite: null }] };
     }

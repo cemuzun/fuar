@@ -26,9 +26,23 @@ function logScrapedContent(url: string, content: string, type: 'html' | 'json' =
     fsLib.writeFileSync(filePath, content);
     console.log(`[Scraper Log] Saved raw content for debugging to: ${filePath}`);
   } catch (err: any) {
-    // Error log suppressed
+    console.error('[logScrapedContent] Failed to write log:', err.message);
   }
 }
+
+// Structured extraction event logger — writes to logs/extraction.jsonl
+function logExtraction(step: string, data: Record<string, any>) {
+  try {
+    const logDir = pathLib.join(process.cwd(), 'logs');
+    if (!fsLib.existsSync(logDir)) fsLib.mkdirSync(logDir, { recursive: true });
+    const entry = JSON.stringify({ ts: new Date().toISOString(), step, ...data }) + '\n';
+    fsLib.appendFileSync(pathLib.join(logDir, 'extraction.jsonl'), entry);
+    console.log(`[Extraction Log] ${step}:`, data);
+  } catch (err: any) {
+    console.error('[logExtraction] Failed to write log:', err.message);
+  }
+}
+
 
 
 
@@ -85,7 +99,7 @@ app.post('/api/jobs/start', async (req, res) => {
     const job = jobs.get(jobId);
     if (job) {
       job.status = 'failed';
-      // Error log suppressed
+      console.error(`[Job ${jobId}] Background job crashed:`, err.message || err);
     }
   });
   
@@ -110,61 +124,51 @@ async function processBackgroundJob(jobId: string, payload: any) {
   if (!job) return;
   
   const shows = payload.shows || [];
+  console.log(`[Job ${jobId}] Starting background extraction for ${shows.length} shows`);
+
   for (let i = job.progress; i < shows.length; i++) {
     job.lastHeartbeat = Date.now();
     job.leaseExpiresAt = Date.now() + 5 * 60 * 1000;
     
+    const show = shows[i];
+    console.log(`[Job ${jobId}] Processing show ${i + 1}/${shows.length}: ${show.eventName}`);
+    
     try {
-      const show = shows[i];
-      
-      let extractedExhibitors = [];
-      if (shows.length > 5) {
-        // Fast mock extraction for bulk requests
-        const mockCount = Math.floor(Math.random() * 25) + 10;
-        for (let j=0; j<mockCount; j++) {
-           extractedExhibitors.push({
-              companyName: `Mock Exhibitor ${j+1} (${show.eventName})`,
-              boothNumber: `A-${100+j}`,
-              boothSize: '10x20',
-              boothType: 'Inline',
-              estimatedBoothBudget: '$15,000 - $30,000',
-              industry: show.category || 'B2B',
-              website: `https://www.example${j}.com`,
-              phone: '555-0100',
-              city: show.city || 'Anytown',
-              state: show.state || 'XX',
-              country: 'USA',
-              description: `Leading provider of solutions for the ${show.category} industry.`,
-              decisionMakers: [
-                 { name: `John Doe ${j}`, title: 'VP of Marketing', department: 'Marketing', email: `john${j}@example.com`, phone: '555-0101' }
-              ]
-           });
-        }
-        await new Promise(r => setTimeout(r, 10)); // Super fast delay for bulk
-      } else {
-        const queryParam = show.officialWebsite || show.eventName;
-        extractedExhibitors = await performExtraction(queryParam, show.eventName, show.city, show.state);
-        await new Promise(r => setTimeout(r, 4500)); // Delay for real API
-      }
-      
+      // Always use real extraction — pass URL if available, otherwise event name as search query
+      const extractionTarget = show.officialWebsite || show.eventName;
+      const extractedExhibitors = await performExtraction(
+        extractionTarget,
+        show.eventName, // always pass the show name separately
+        show.city,
+        show.state
+      );
+
+      console.log(`[Job ${jobId}] Show "${show.eventName}": extracted ${extractedExhibitors.length} exhibitors`);
+
       job.results.push({
         showId: show.id,
         showName: show.eventName,
         exhibitors: extractedExhibitors
       });
     } catch (err: any) {
-      // Error log suppressed
+      console.error(`[Job ${jobId}] Extraction failed for show "${show.eventName}":`, err.message);
       job.results.push({
-        showId: shows[i].id,
-        showName: shows[i].eventName,
+        showId: show.id,
+        showName: show.eventName,
+        exhibitors: [],
         error: err.message || 'Extraction failed'
       });
     }
     
     job.progress = i + 1;
+    // Throttle between shows to avoid API rate limits
+    if (i < shows.length - 1) {
+      await new Promise(r => setTimeout(r, 2000));
+    }
   }
   
   job.status = 'completed';
+  console.log(`[Job ${jobId}] Completed. Total results: ${job.results.length}`);
 }
 // ------------------------------
 
@@ -440,17 +444,17 @@ ${chunk}`;
         return fallbackExhibitors;
       };
       
-      console.log('CALLING SCRAPER WITH URL:', contentToAnalyze);
+      logExtraction('scraper_start', { url: contentToAnalyze, tradeShowName });
       const scrapeResult = await scraper.scrape(contentToAnalyze, tradeShowName, city, state, geminiFallback);
-      console.log('SCRAPER RETURNED:', scrapeResult.exhibitors.length, 'exhibitors');
+      logExtraction('scraper_done', { url: contentToAnalyze, exhibitorCount: scrapeResult.exhibitors.length, diagnostics: scrapeResult.diagnostics });
       extractedExhibitors = scrapeResult.exhibitors;
     } else {
-      console.log('Processing non-URL raw text/HTML extraction, length:', contentToAnalyze.length);
+      logExtraction('text_extraction_start', { contentLength: contentToAnalyze.length, tradeShowName });
 
       // 1. Try deterministic HTML / structure extraction
       const adapter = new GenericDeterministicAdapter();
       extractedExhibitors = await adapter.extractExhibitors('pasted-content', contentToAnalyze, null, []);
-      console.log('Deterministic adapter extracted:', extractedExhibitors.length, 'companies');
+      logExtraction('deterministic_done', { count: extractedExhibitors.length });
 
       // 2. If deterministic finds nothing, or to enrich text, use Gemini AI
       if (!extractedExhibitors || extractedExhibitors.length === 0) {
@@ -489,9 +493,9 @@ ${contentToAnalyze.substring(0, 25000)}`;
             extractionMethod: 'ai',
             confidence: 0.85
           }));
-          console.log('Gemini AI extracted from raw text:', extractedExhibitors.length, 'companies');
+          logExtraction('gemini_text_extraction_done', { count: extractedExhibitors.length });
         } catch (e: any) {
-          console.error('AI extraction for raw text failed/quota:', e.message);
+          logExtraction('gemini_text_extraction_failed', { error: e.message });
           
           // 3. Local pattern-matching fallback parser for line-by-line text
           const lines = contentToAnalyze.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 2 && l.length < 80);
@@ -512,10 +516,12 @@ ${contentToAnalyze.substring(0, 25000)}`;
             }
           }
           extractedExhibitors = fallbackList;
+          logExtraction('text_pattern_fallback_done', { count: extractedExhibitors.length });
         }
       }
     }
     
+    logExtraction('extraction_complete', { tradeShowName, totalExtracted: extractedExhibitors.length });
     return extractedExhibitors;
 }
 

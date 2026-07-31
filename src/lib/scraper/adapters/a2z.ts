@@ -14,6 +14,11 @@ export class A2ZAdapter implements ScraperAdapter {
   async extractExhibitors(url: string, html: string, page: any, interceptedXhr: any[]): Promise<ExhibitorData[]> {
     const exhibitors: ExhibitorData[] = [];
     
+    if (!page) {
+      console.warn('[A2ZAdapter] No page object available, skipping DOM extraction');
+      return exhibitors;
+    }
+
     // Fallback logic for A2Z parsing based on common list DOM elements
     try {
       const handles = await page.$$('.exhibitorName, .BoothContactName, .companyName');
@@ -32,7 +37,9 @@ export class A2ZAdapter implements ScraperAdapter {
           });
         }
       }
-    } catch(e) {}
+    } catch(e) {
+      console.error('[A2ZAdapter] DOM extraction error:', e);
+    }
     
     return exhibitors;
   }
