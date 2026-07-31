@@ -1,4 +1,5 @@
 import { DirectoryScraper } from './src/lib/scraper/index.js';
+import { GenericDeterministicAdapter } from './src/lib/scraper/adapters/generic-deterministic.js';
 import { ExhibitorData } from './src/lib/scraper/types.js';
 import express from 'express';
 import path from 'path';
@@ -321,7 +322,7 @@ Find:
 2. Actual verified exhibitor companies with booth numbers, booth sizes, industry, and contact details.`;
 
     const searchRes = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-2.5-flash",
       contents: searchPrompt,
       config: {
         tools: [{ googleSearch: {} }],
@@ -373,7 +374,7 @@ JSON Schema:
 }`;
 
     const structRes = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-2.5-flash",
       contents: structPrompt,
       config: {
         responseMimeType: 'application/json',
@@ -390,8 +391,7 @@ JSON Schema:
 
 // 3. Extract exhibitors from custom URL or pasted text
 
-async function performExtraction(rawText: string, tradeShowName: string, city: string, state: string) {
-    const ai = getGenAI();
+export async function performExtraction(rawText: string, tradeShowName: string, city: string, state: string) {
     let contentToAnalyze = rawText.trim();
     let isUrl = contentToAnalyze.startsWith('http://') || contentToAnalyze.startsWith('https://');
     
@@ -400,6 +400,7 @@ async function performExtraction(rawText: string, tradeShowName: string, city: s
     if (isUrl) {
       const scraper = new DirectoryScraper();
       const geminiFallback = async (candidates: string[]) => {
+        const ai = getGenAI();
         let fallbackExhibitors: any[] = [];
         for (const chunk of candidates) {
            const prompt = `Analyze this text from a trade show directory ('${tradeShowName}') and extract genuine exhibitor companies ONLY. Reject generic navigation links, categories, and event names. Do not hallucinate. 
@@ -408,20 +409,20 @@ TEXT:
 ${chunk}`;
            try {
              const aiRes = await ai.models.generateContent({
-                model: "gemini-flash-latest",
+                model: "gemini-2.5-flash",
                 contents: prompt,
                 config: {
                   responseMimeType: 'application/json',
                   responseSchema: {
-                    type: "ARRAY" as any,
+                    type: Type.ARRAY,
                     items: {
-                      type: "OBJECT" as any,
+                      type: Type.OBJECT,
                       properties: {
-                        companyName: { type: "STRING" as any },
-                        boothNumber: { type: "STRING" as any },
-                        boothSize: { type: "STRING" as any },
-                        boothType: { type: "STRING" as any },
-                        industry: { type: "STRING" as any },
+                        companyName: { type: Type.STRING },
+                        boothNumber: { type: Type.STRING },
+                        boothSize: { type: Type.STRING },
+                        boothType: { type: Type.STRING },
+                        industry: { type: Type.STRING },
                       },
                       required: ['companyName']
                     }
@@ -443,12 +444,78 @@ ${chunk}`;
       const scrapeResult = await scraper.scrape(contentToAnalyze, tradeShowName, city, state, geminiFallback);
       console.log('SCRAPER RETURNED:', scrapeResult.exhibitors.length, 'exhibitors');
       extractedExhibitors = scrapeResult.exhibitors;
+    } else {
+      console.log('Processing non-URL raw text/HTML extraction, length:', contentToAnalyze.length);
+
+      // 1. Try deterministic HTML / structure extraction
+      const adapter = new GenericDeterministicAdapter();
+      extractedExhibitors = await adapter.extractExhibitors('pasted-content', contentToAnalyze, null, []);
+      console.log('Deterministic adapter extracted:', extractedExhibitors.length, 'companies');
+
+      // 2. If deterministic finds nothing, or to enrich text, use Gemini AI
+      if (!extractedExhibitors || extractedExhibitors.length === 0) {
+        try {
+          const ai = getGenAI();
+          const prompt = `Analyze this raw text/HTML pasted from a trade show exhibitor list ('${tradeShowName || 'Trade Show'}') and extract all legitimate exhibitor company names and booth numbers.
+          
+RAW CONTENT:
+${contentToAnalyze.substring(0, 25000)}`;
+
+          const aiRes = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    companyName: { type: Type.STRING },
+                    boothNumber: { type: Type.STRING },
+                    boothSize: { type: Type.STRING },
+                    boothType: { type: Type.STRING },
+                    industry: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                  },
+                  required: ['companyName']
+                }
+              }
+            }
+          });
+          const parsed = JSON.parse(aiRes.text || '[]');
+          extractedExhibitors = parsed.map((p: any) => ({
+            ...p,
+            extractionMethod: 'ai',
+            confidence: 0.85
+          }));
+          console.log('Gemini AI extracted from raw text:', extractedExhibitors.length, 'companies');
+        } catch (e: any) {
+          console.error('AI extraction for raw text failed/quota:', e.message);
+          
+          // 3. Local pattern-matching fallback parser for line-by-line text
+          const lines = contentToAnalyze.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 2 && l.length < 80);
+          const fallbackList: any[] = [];
+          for (const line of lines) {
+            if (/^(home|contact|privacy|terms|menu|categories|search|login|register)$/i.test(line)) continue;
+            const match = line.match(/^([A-Za-z0-9&,.\-\s']+?)(?:\s*[\-\t|:]\s*(?:Booth|Stand)?\s*([A-Z0-9\-]+))?$/i);
+            if (match && match[1]) {
+              const compName = match[1].trim();
+              if (compName.length >= 3) {
+                fallbackList.push({
+                  companyName: compName,
+                  boothNumber: match[2] || null,
+                  extractionMethod: 'text-pattern-fallback',
+                  confidence: 0.7
+                });
+              }
+            }
+          }
+          extractedExhibitors = fallbackList;
+        }
+      }
     }
     
-    if (!extractedExhibitors || extractedExhibitors.length === 0) {
-      console.log('No exhibitors extracted and fallback is disabled.');
-      return [];
-    }
     return extractedExhibitors;
 }
 
@@ -492,7 +559,7 @@ app.post('/api/extract/generate-roster', async (req, res) => {
       const searchPrompt = `Search the web for the official exhibitor list for '${cleanShow}' in '${city || 'Chicago'}', '${state || 'IL'}'. Find as many ACTUAL (up to 2000) real exhibitor companies attending. Find their real booth numbers, website, industry, and any available contact info or decision makers. Do not hallucinate. List them as text.`;
       
       const searchRes = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-2.5-flash",
         contents: searchPrompt,
         config: {
           tools: [{ googleSearch: {} }],
@@ -504,7 +571,7 @@ app.post('/api/extract/generate-roster', async (req, res) => {
       const structPrompt = `Based strictly on the following search results:\n${rawSearchText}\n\nCarefully analyze these results and extract them into a strict JSON array of REAL exhibitor company objects. Look for exact company names and ignore generic text. Do not hallucinate or make up any company that is not mentioned in the results. If you cannot find any, return an empty array.\n\nFor each exhibitor company, provide:\n- companyName\n- boothNumber\n- boothSize (e.g. '20x20 Island')\n- boothType ('Island', 'Inline', 'Peninsula', or 'Corner')\n- estimatedBoothBudget\n- industry\n- website (URL)\n- phone\n- city, state, country ('USA')\n- description (1 sentence)\n- decisionMakers: array of REAL key contacts ONLY IF found in the text. NEVER invent names like 'Contact Lead' or 'John Doe'. Leave empty [] if none found.`;
       
       const structRes = await ai.models.generateContent({
-        model: "gemini-flash-latest",
+        model: "gemini-2.5-flash",
         contents: structPrompt,
         config: {
           responseMimeType: 'application/json',
@@ -590,7 +657,7 @@ Look for roles such as:
 Find their Full Names, Titles, official corporate Email pattern or direct email (e.g., first.last@domain.com), corporate phone number, and LinkedIn profiles.`;
 
     const searchRes = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-2.5-flash",
       contents: searchPrompt,
       config: {
         tools: [{ googleSearch: {} }],
@@ -620,7 +687,7 @@ Return a JSON object with:
 `;
 
     const structRes = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-2.5-flash",
       contents: structPrompt,
       config: {
         responseMimeType: 'application/json',
@@ -693,7 +760,7 @@ Return JSON with:
 `;
 
     const aiRes = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -1118,4 +1185,6 @@ async function startServer() {
   });
 }
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
