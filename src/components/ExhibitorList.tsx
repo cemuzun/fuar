@@ -292,13 +292,13 @@ export const ExhibitorList: React.FC<ExhibitorListProps> = ({
     // Search query filter
     if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase();
-      const matchesCompany = ex.companyName.toLowerCase().includes(q);
-      const matchesIndustry = ex.industry.toLowerCase().includes(q);
-      const matchesBooth = ex.boothNumber.toLowerCase().includes(q);
-      const matchesShow = ex.tradeShowName.toLowerCase().includes(q);
-      const matchesCity = ex.tradeShowCity.toLowerCase().includes(q);
-      const matchesDM = ex.decisionMakers.some(
-        (dm) => dm.name.toLowerCase().includes(q) || dm.email.toLowerCase().includes(q) || dm.title.toLowerCase().includes(q)
+      const matchesCompany = (ex.companyName || '').toLowerCase().includes(q);
+      const matchesIndustry = (ex.industry || '').toLowerCase().includes(q);
+      const matchesBooth = (ex.boothNumber || '').toLowerCase().includes(q);
+      const matchesShow = (ex.tradeShowName || '').toLowerCase().includes(q);
+      const matchesCity = (ex.tradeShowCity || '').toLowerCase().includes(q);
+      const matchesDM = (ex.decisionMakers || []).some(
+        (dm) => (dm.name || '').toLowerCase().includes(q) || (dm.email || '').toLowerCase().includes(q) || (dm.title || '').toLowerCase().includes(q)
       );
 
       if (!matchesCompany && !matchesIndustry && !matchesBooth && !matchesShow && !matchesCity && !matchesDM) {
@@ -313,30 +313,32 @@ export const ExhibitorList: React.FC<ExhibitorListProps> = ({
 
     // Booth size filter
     if (boothSizeFilter !== 'ALL') {
-      if (boothSizeFilter === 'ISLAND' && !ex.boothSize.toLowerCase().includes('island') && ex.boothType !== 'Island') {
+      const sizeStr = (ex.boothSize || '').toLowerCase();
+      if (boothSizeFilter === 'ISLAND' && !sizeStr.includes('island') && ex.boothType !== 'Island') {
         return false;
       }
-      if (boothSizeFilter === '20x20' && !ex.boothSize.includes('20x20') && !ex.boothSize.includes('20x30')) {
+      if (boothSizeFilter === '20x20' && !sizeStr.includes('20x20') && !sizeStr.includes('20x30')) {
         return false;
       }
-      if (boothSizeFilter === '10x10' && !ex.boothSize.includes('10x10') && !ex.boothSize.includes('10x20')) {
+      if (boothSizeFilter === '10x10' && !sizeStr.includes('10x10') && !sizeStr.includes('10x20')) {
         return false;
       }
     }
 
     // Has decision maker filter
-    if (hasDmOnly && ex.decisionMakers.length === 0) {
+    if (hasDmOnly && (!ex.decisionMakers || ex.decisionMakers.length === 0)) {
       return false;
     }
 
     return true;
   });
 
-  const getBoothBadgeStyle = (size: string, type: string) => {
-    if (size.toLowerCase().includes('island') || type === 'Island') {
+  const getBoothBadgeStyle = (size: string | null, type: string | null) => {
+    const sizeStr = (size || '').toLowerCase();
+    if (sizeStr.includes('island') || type === 'Island') {
       return 'bg-amber-50 text-amber-700 border-amber-200';
     }
-    if (size.includes('20x20') || size.includes('30x30') || size.includes('20x30')) {
+    if (sizeStr.includes('20x20') || sizeStr.includes('30x30') || sizeStr.includes('20x30')) {
       return 'bg-blue-50 text-blue-700 border-blue-200';
     }
     return 'bg-slate-100 text-slate-600 border-slate-200';

@@ -159,7 +159,7 @@ export default function App() {
   );
 
   const islandBoothsCount = allExhibitors.filter(
-    (e) => e.boothSize.toLowerCase().includes('island') || e.boothType === 'Island'
+    (e) => (e.boothSize || '').toLowerCase().includes('island') || e.boothType === 'Island'
   ).length;
 
   // Orbus sync handler directly from header

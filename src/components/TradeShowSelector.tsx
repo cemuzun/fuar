@@ -63,9 +63,9 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
     if (selectedStateFilter && show.state !== selectedStateFilter) return false;
     if (showSearch.trim()) {
       const q = showSearch.toLowerCase();
-      const matchName = show.eventName.toLowerCase().includes(q) || show.shortName.toLowerCase().includes(q);
-      const matchCity = show.city.toLowerCase().includes(q) || (show.state || '').toLowerCase().includes(q);
-      const matchCategory = show.category.toLowerCase().includes(q);
+      const matchName = (show.eventName || '').toLowerCase().includes(q) || (show.shortName || '').toLowerCase().includes(q);
+      const matchCity = (show.city || '').toLowerCase().includes(q) || (show.state || '').toLowerCase().includes(q);
+      const matchCategory = (show.category || '').toLowerCase().includes(q);
       if (!matchName && !matchCity && !matchCategory) return false;
     }
     if (hideShortLeadShows) {

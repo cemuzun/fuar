@@ -98,16 +98,16 @@ export const LeadsPage: React.FC<LeadsPageProps> = ({
     // Search query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const matchComp = ex.companyName.toLowerCase().includes(q) ||
-        ex.industry.toLowerCase().includes(q) ||
-        ex.tradeShowName.toLowerCase().includes(q) ||
-        ex.website.toLowerCase().includes(q);
+      const matchComp = (ex.companyName || '').toLowerCase().includes(q) ||
+        (ex.industry || '').toLowerCase().includes(q) ||
+        (ex.tradeShowName || '').toLowerCase().includes(q) ||
+        (ex.website || '').toLowerCase().includes(q);
 
       const matchDm = ex.decisionMakers?.some(
         (dm) =>
-          dm.name.toLowerCase().includes(q) ||
-          dm.email.toLowerCase().includes(q) ||
-          dm.title.toLowerCase().includes(q) ||
+          (dm.name || '').toLowerCase().includes(q) ||
+          (dm.email || '').toLowerCase().includes(q) ||
+          (dm.title || '').toLowerCase().includes(q) ||
           (dm.phone && dm.phone.includes(q))
       );
 
