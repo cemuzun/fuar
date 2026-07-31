@@ -56,13 +56,11 @@ export class DirectoryScraper {
       browser = await chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] });
       page = await browser.newPage();
 
-      // Set a realistic browser UA to reduce bot detection blocks
       await page.setExtraHTTPHeaders({
         'Accept-Language': 'en-US,en;q=0.9',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       });
       
-      // Intercept XHR/fetch responses — raised cap to 200 to capture paginated API calls
       page.on('response', async (response) => {
         const req = response.request();
         if (req.resourceType() === 'fetch' || req.resourceType() === 'xhr') {
@@ -71,42 +69,37 @@ export class DirectoryScraper {
               const json = await response.json();
               if (interceptedXhr.length < 200) {
                 interceptedXhr.push({ url: response.url(), json });
-                console.log(`[Scraper] XHR intercepted (#${interceptedXhr.length}): ${response.url().substring(0, 80)}`);
               }
-            } catch (e) {
-              // Ignore non-json responses
-            }
+            } catch (e) {}
           }
         }
       });
 
-      // Use networkidle for SPA sites (React/Vue trade show directories) with generous timeout
       try {
-        await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
+        await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
       } catch (e) {
-        // networkidle timed out — fall back to domcontentloaded + extra wait
-        console.warn(`[Scraper] networkidle timed out for ${url}, falling back`);
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.waitForTimeout(5000);
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        await page.waitForTimeout(3000);
       }
 
-      // Extra wait for lazy-loaded content
-      await page.waitForTimeout(3000);
+      await page.waitForTimeout(2000);
       htmlText = await page.content();
-      console.log(`[Scraper] Page loaded, HTML size: ${htmlText.length} bytes, XHRs intercepted: ${interceptedXhr.length}`);
-
-      // Save raw HTML to disk for debugging
-      const safeUrl = url.replace(/[^a-z0-9]/gi, '_').substring(0, 50).toLowerCase();
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const logDir = pathLib.join(process.cwd(), 'logs');
-      if (!fsLib.existsSync(logDir)) fsLib.mkdirSync(logDir, { recursive: true });
-      fsLib.writeFileSync(pathLib.join(logDir, `scrape_${safeUrl}_${timestamp}.html`), htmlText);
-      console.log(`[Scraper] Raw HTML saved to logs/scrape_${safeUrl}_${timestamp}.html`);
-      
     } catch (e: any) {
-      console.error(`[Scraper] Playwright error for ${url}:`, e.message);
-      if (browser) await browser.close();
-      return { exhibitors: [{ companyName: 'blocked', sourceUrl: url, sourceEvidence: e.message, extractionMethod: 'deterministic', confidence: 0, boothNumber: null, profileUrl: null, companyWebsite: null }] };
+      console.warn(`[Scraper] Playwright unavailable (${e.message}), attempting HTTP fetch fallback...`);
+      try {
+        const res = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          }
+        });
+        if (res.ok) {
+          htmlText = await res.text();
+          console.log(`[Scraper] HTTP fetch succeeded, HTML size: ${htmlText.length} bytes`);
+        }
+      } catch (fetchErr: any) {
+        console.error(`[Scraper] HTTP fetch fallback failed:`, fetchErr.message);
+      }
     }
     
     // Choose adapter

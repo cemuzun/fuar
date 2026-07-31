@@ -474,10 +474,6 @@ var GenericDeterministicAdapter = class {
   }
 };
 
-// src/lib/scraper/index.ts
-var fsLib = __toESM(require("fs"), 1);
-var pathLib = __toESM(require("path"), 1);
-
 // src/lib/db.ts
 var import_path = __toESM(require("path"), 1);
 var import_fs = __toESM(require("fs"), 1);
@@ -685,7 +681,6 @@ var DirectoryScraper = class {
               const json = await response.json();
               if (interceptedXhr.length < 200) {
                 interceptedXhr.push({ url: response.url(), json });
-                console.log(`[Scraper] XHR intercepted (#${interceptedXhr.length}): ${response.url().substring(0, 80)}`);
               }
             } catch (e) {
             }
@@ -693,25 +688,29 @@ var DirectoryScraper = class {
         }
       });
       try {
-        await page.goto(url, { waitUntil: "networkidle", timeout: 45e3 });
+        await page.goto(url, { waitUntil: "networkidle", timeout: 3e4 });
       } catch (e) {
-        console.warn(`[Scraper] networkidle timed out for ${url}, falling back`);
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 3e4 });
-        await page.waitForTimeout(5e3);
+        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 2e4 });
+        await page.waitForTimeout(3e3);
       }
-      await page.waitForTimeout(3e3);
+      await page.waitForTimeout(2e3);
       htmlText = await page.content();
-      console.log(`[Scraper] Page loaded, HTML size: ${htmlText.length} bytes, XHRs intercepted: ${interceptedXhr.length}`);
-      const safeUrl = url.replace(/[^a-z0-9]/gi, "_").substring(0, 50).toLowerCase();
-      const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
-      const logDir = pathLib.join(process.cwd(), "logs");
-      if (!fsLib.existsSync(logDir)) fsLib.mkdirSync(logDir, { recursive: true });
-      fsLib.writeFileSync(pathLib.join(logDir, `scrape_${safeUrl}_${timestamp}.html`), htmlText);
-      console.log(`[Scraper] Raw HTML saved to logs/scrape_${safeUrl}_${timestamp}.html`);
     } catch (e) {
-      console.error(`[Scraper] Playwright error for ${url}:`, e.message);
-      if (browser) await browser.close();
-      return { exhibitors: [{ companyName: "blocked", sourceUrl: url, sourceEvidence: e.message, extractionMethod: "deterministic", confidence: 0, boothNumber: null, profileUrl: null, companyWebsite: null }] };
+      console.warn(`[Scraper] Playwright unavailable (${e.message}), attempting HTTP fetch fallback...`);
+      try {
+        const res = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+          }
+        });
+        if (res.ok) {
+          htmlText = await res.text();
+          console.log(`[Scraper] HTTP fetch succeeded, HTML size: ${htmlText.length} bytes`);
+        }
+      } catch (fetchErr) {
+        console.error(`[Scraper] HTTP fetch fallback failed:`, fetchErr.message);
+      }
     }
     let selectedAdapter = adapters[adapters.length - 1];
     for (const adapter of adapters) {
@@ -753,19 +752,19 @@ var import_genai = require("@google/genai");
 var import_dotenv = __toESM(require("dotenv"), 1);
 var import_nodemailer = __toESM(require("nodemailer"), 1);
 var cheerio2 = __toESM(require("cheerio"), 1);
-var fsLib2 = __toESM(require("fs"), 1);
-var pathLib2 = __toESM(require("path"), 1);
+var fsLib = __toESM(require("fs"), 1);
+var pathLib = __toESM(require("path"), 1);
 function logScrapedContent(url, content, type = "html") {
   try {
-    const logDir = pathLib2.join(process.cwd(), "logs");
-    if (!fsLib2.existsSync(logDir)) {
-      fsLib2.mkdirSync(logDir, { recursive: true });
+    const logDir = pathLib.join(process.cwd(), "logs");
+    if (!fsLib.existsSync(logDir)) {
+      fsLib.mkdirSync(logDir, { recursive: true });
     }
     const safeUrl = url.replace(/[^a-z0-9]/gi, "_").substring(0, 50).toLowerCase();
     const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-");
     const filename = `scrape_${safeUrl}_${timestamp}.${type}`;
-    const filePath = pathLib2.join(logDir, filename);
-    fsLib2.writeFileSync(filePath, content);
+    const filePath = pathLib.join(logDir, filename);
+    fsLib.writeFileSync(filePath, content);
     console.log(`[Scraper Log] Saved raw content for debugging to: ${filePath}`);
   } catch (err) {
     console.error("[logScrapedContent] Failed to write log:", err.message);
@@ -773,10 +772,10 @@ function logScrapedContent(url, content, type = "html") {
 }
 function logExtraction(step, data) {
   try {
-    const logDir = pathLib2.join(process.cwd(), "logs");
-    if (!fsLib2.existsSync(logDir)) fsLib2.mkdirSync(logDir, { recursive: true });
+    const logDir = pathLib.join(process.cwd(), "logs");
+    if (!fsLib.existsSync(logDir)) fsLib.mkdirSync(logDir, { recursive: true });
     const entry = JSON.stringify({ ts: (/* @__PURE__ */ new Date()).toISOString(), step, ...data }) + "\n";
-    fsLib2.appendFileSync(pathLib2.join(logDir, "extraction.jsonl"), entry);
+    fsLib.appendFileSync(pathLib.join(logDir, "extraction.jsonl"), entry);
     console.log(`[Extraction Log] ${step}:`, data);
   } catch (err) {
     console.error("[logExtraction] Failed to write log:", err.message);
@@ -902,19 +901,19 @@ app.get("/api/health", (_req, res) => {
 });
 app.get("/api/scraper-logs", (req, res) => {
   try {
-    const logDir = pathLib2.join(process.cwd(), "logs");
-    if (!fsLib2.existsSync(logDir)) {
+    const logDir = pathLib.join(process.cwd(), "logs");
+    if (!fsLib.existsSync(logDir)) {
       return res.json({ success: true, logs: [] });
     }
-    const files = fsLib2.readdirSync(logDir);
+    const files = fsLib.readdirSync(logDir);
     const logs = files.filter((f) => f.endsWith(".html") || f.endsWith(".json")).map((f) => {
-      const filePath = pathLib2.join(logDir, f);
-      const stats = fsLib2.statSync(filePath);
+      const filePath = pathLib.join(logDir, f);
+      const stats = fsLib.statSync(filePath);
       return {
         filename: f,
         size: stats.size,
         mtime: stats.mtimeMs,
-        content: fsLib2.readFileSync(filePath, "utf-8").substring(0, 5e5)
+        content: fsLib.readFileSync(filePath, "utf-8").substring(0, 5e5)
         // cap size
       };
     }).sort((a, b) => b.mtime - a.mtime).slice(0, 5);
@@ -1295,8 +1294,57 @@ ${contentToAnalyze.substring(0, 25e3)}`;
           }
         }
         extractedExhibitors = fallbackList;
-        logExtraction("text_pattern_fallback_done", { count: extractedExhibitors.length });
       }
+    }
+  }
+  extractedExhibitors = extractedExhibitors.filter((ex) => ex.companyName && ex.companyName !== "blocked");
+  if (extractedExhibitors.length === 0 && (tradeShowName || contentToAnalyze)) {
+    const searchTarget = tradeShowName || contentToAnalyze;
+    console.log(`[Extraction] No exhibitors found via scraper, falling back to Gemini Search Grounding for: ${searchTarget}`);
+    try {
+      const ai = getGenAI();
+      const searchPrompt = `Search the live web to find the official exhibitor roster list for the trade show: "${searchTarget}" ${city ? `in ${city}` : ""} ${state || ""}. Extract 20-40 genuine exhibitor company names with their booth numbers and industry categories.`;
+      const searchRes = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: searchPrompt,
+        config: { tools: [{ googleSearch: {} }] }
+      });
+      const rawText2 = searchRes.text || "";
+      if (rawText2.length > 50) {
+        const structRes = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: `Convert these trade show exhibitor findings into a JSON array:
+${rawText2}`,
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: import_genai.Type.ARRAY,
+              items: {
+                type: import_genai.Type.OBJECT,
+                properties: {
+                  companyName: { type: import_genai.Type.STRING },
+                  boothNumber: { type: import_genai.Type.STRING },
+                  industry: { type: import_genai.Type.STRING },
+                  description: { type: import_genai.Type.STRING }
+                },
+                required: ["companyName"]
+              }
+            }
+          }
+        });
+        const searchExhibitors = JSON.parse(structRes.text || "[]").map((p) => ({
+          ...p,
+          extractionMethod: "ai",
+          confidence: 0.9,
+          sourceEvidence: "Gemini Live Search"
+        }));
+        if (searchExhibitors.length > 0) {
+          extractedExhibitors = searchExhibitors;
+          logExtraction("gemini_search_fallback_done", { searchTarget, count: searchExhibitors.length });
+        }
+      }
+    } catch (e) {
+      console.warn(`[Extraction] Gemini search fallback warning:`, e.message);
     }
   }
   logExtraction("extraction_complete", { tradeShowName, totalExtracted: extractedExhibitors.length });

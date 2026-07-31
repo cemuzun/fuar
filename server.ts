@@ -662,8 +662,64 @@ ${contentToAnalyze.substring(0, 25000)}`;
             }
           }
           extractedExhibitors = fallbackList;
-          logExtraction('text_pattern_fallback_done', { count: extractedExhibitors.length });
         }
+      }
+    }
+
+    // Filter out dummy 'blocked' entries
+    extractedExhibitors = extractedExhibitors.filter((ex: any) => ex.companyName && ex.companyName !== 'blocked');
+
+    // If deterministic & Playwright returned 0 exhibitors, fall back to Gemini Live Search Grounding
+    if (extractedExhibitors.length === 0 && (tradeShowName || contentToAnalyze)) {
+      const searchTarget = tradeShowName || contentToAnalyze;
+      console.log(`[Extraction] No exhibitors found via scraper, falling back to Gemini Search Grounding for: ${searchTarget}`);
+      try {
+        const ai = getGenAI();
+        const searchPrompt = `Search the live web to find the official exhibitor roster list for the trade show: "${searchTarget}" ${city ? `in ${city}` : ''} ${state || ''}. Extract 20-40 genuine exhibitor company names with their booth numbers and industry categories.`;
+        const searchRes = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: searchPrompt,
+          config: { tools: [{ googleSearch: {} }] },
+        });
+
+        const rawText = searchRes.text || '';
+        if (rawText.length > 50) {
+          const structRes = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Convert these trade show exhibitor findings into a JSON array:
+${rawText}`,
+            config: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    companyName: { type: Type.STRING },
+                    boothNumber: { type: Type.STRING },
+                    industry: { type: Type.STRING },
+                    description: { type: Type.STRING },
+                  },
+                  required: ['companyName']
+                }
+              }
+            }
+          });
+
+          const searchExhibitors = JSON.parse(structRes.text || '[]').map((p: any) => ({
+            ...p,
+            extractionMethod: 'ai',
+            confidence: 0.9,
+            sourceEvidence: 'Gemini Live Search'
+          }));
+
+          if (searchExhibitors.length > 0) {
+            extractedExhibitors = searchExhibitors;
+            logExtraction('gemini_search_fallback_done', { searchTarget, count: searchExhibitors.length });
+          }
+        }
+      } catch (e: any) {
+        console.warn(`[Extraction] Gemini search fallback warning:`, e.message);
       }
     }
     
