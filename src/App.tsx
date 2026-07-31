@@ -697,7 +697,7 @@ export default function App() {
   const unreadEmailCount = emailMessages.filter((m) => m.folder === 'inbox' && !m.isRead).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="w-full min-h-screen bg-slate-50 font-sans text-slate-800 antialiased flex flex-col selection:bg-blue-600 selection:text-white">
       
       {/* Top Header */}
       <Header
