@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>USA Trade Show Exhibitor & Decision Maker Extractor</title>
+    <script>
+      (function() {
+        try {
+          var realFetch = window.fetch ? window.fetch.bind(window) : null;
+          var storedFetch = realFetch;
+
+          function getFetch() {
+            return storedFetch || realFetch;
+          }
+
+          function setFetch(v) {
+            storedFetch = v;
+          }
+
+          var targets = [Window.prototype, window, globalThis];
+          for (var i = 0; i < targets.length; i++) {
+            var t = targets[i];
+            if (!t) continue;
+            try {
+              Object.defineProperty(t, 'fetch', {
+                get: getFetch,
+                set: setFetch,
+                configurable: true,
+                enumerable: true
+              });
+            } catch (e) {}
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
