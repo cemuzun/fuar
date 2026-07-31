@@ -1,0 +1,6 @@
+{
+  "name": "Exhibitor & Decision Maker Extractor",
+  "description": "Extract USA trade show exhibitors, discover decision makers with verified emails and phones, and generate personalized booth production sales pitches.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
