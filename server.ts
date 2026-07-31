@@ -801,9 +801,9 @@ app.post('/api/hubspot/sync', async (req, res) => {
               }
             }
           }
-        } catch (e) {
-        console.log("Puppeteer exception handled");
-      }
+        } catch (e: any) {
+          console.error("HubSpot company/contact sync error:", e.message || e);
+        }
       }
 
       return res.json({
@@ -1085,6 +1085,18 @@ app.post('/api/email/verify-smtp', async (req, res) => {
   }
 });
 
+app.get('/api/mock_directory', (req, res) => {
+  res.send(`
+    <html><body>
+    <table>
+      <tr><td>Real Tech Inc</td><td>A100</td></tr>
+      <tr><td>Acme Corp</td><td>B200</td></tr>
+      <tr><td>New Products</td><td>C300</td></tr>
+    </table>
+    </body></html>
+  `);
+});
+
 // Vite Integration for dev / production static serve
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
@@ -1107,15 +1119,3 @@ async function startServer() {
 }
 
 startServer();
-
-app.get('/api/mock_directory', (req, res) => {
-  res.send(`
-    <html><body>
-    <table>
-      <tr><td>Real Tech Inc</td><td>A100</td></tr>
-      <tr><td>Acme Corp</td><td>B200</td></tr>
-      <tr><td>New Products</td><td>C300</td></tr>
-    </table>
-    </body></html>
-  `);
-});
