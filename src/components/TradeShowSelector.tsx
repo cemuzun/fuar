@@ -1,8 +1,21 @@
 import React, { useState } from 'react';
 import { TradeShowEvent } from '../types';
-import { MapPin, Calendar, CheckCircle2, Layers, AlertTriangle, Clock, Database, Search, Sparkles } from 'lucide-react';
+import { MapPin, Calendar, CheckCircle2, Layers, AlertTriangle, Clock, Database, Search, Sparkles, RefreshCw, Globe } from 'lucide-react';
 import { getDaysUntilEvent } from '../utils/dateUtils';
 import { TOTAL_ORBUS_USA_SHOWS_COUNT } from '../data/initialShows';
+
+const COUNTRY_TABS = [
+  { key: 'usa',     flag: '🇺🇸', label: 'USA' },
+  { key: 'germany', flag: '🇩🇪', label: 'Germany' },
+  { key: 'uk',      flag: '🇬🇧', label: 'UK' },
+  { key: 'turkey',  flag: '🇹🇷', label: 'Turkey' },
+  { key: 'uae',     flag: '🇦🇪', label: 'UAE' },
+  { key: 'france',  flag: '🇫🇷', label: 'France' },
+  { key: 'china',   flag: '🇨🇳', label: 'China' },
+  { key: 'italy',   flag: '🇮🇹', label: 'Italy' },
+  { key: 'spain',   flag: '🇪🇸', label: 'Spain' },
+  { key: 'global',  flag: '🌐', label: 'Global' },
+];
 
 interface TradeShowSelectorProps {
   shows: TradeShowEvent[];
@@ -17,6 +30,9 @@ interface TradeShowSelectorProps {
   onOpenExtractor: () => void;
   onExtractCompaniesForShow?: (showId: string) => void;
   isExtractingCompanies?: boolean;
+  onFetchDirectory: (country: string) => Promise<void>;
+  isFetchingDirectory?: boolean;
+  activeCountry?: string;
 }
 
 export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
@@ -32,64 +48,84 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
   onOpenExtractor,
   onExtractCompaniesForShow,
   isExtractingCompanies = false,
+  onFetchDirectory,
+  isFetchingDirectory = false,
+  activeCountry = 'usa',
 }) => {
   const [showSearch, setShowSearch] = useState('');
   const [showLimit, setShowLimit] = useState<number>(10);
 
-  // Extract unique USA states from the available shows
-  const availableStates = Array.from(new Set(shows.map((s) => s.state))).sort();
+  // Extract unique states/regions from the available shows
+  const availableStates = Array.from(new Set(shows.map((s) => s.state).filter(Boolean))).sort();
 
   // Filter shows based on state, search, and lead time cutoff
   const filteredShows = shows.filter((show) => {
-    // State filter
     if (selectedStateFilter && show.state !== selectedStateFilter) return false;
-
-    // Search query
     if (showSearch.trim()) {
       const q = showSearch.toLowerCase();
       const matchName = show.eventName.toLowerCase().includes(q) || show.shortName.toLowerCase().includes(q);
-      const matchCity = show.city.toLowerCase().includes(q) || show.state.toLowerCase().includes(q);
+      const matchCity = show.city.toLowerCase().includes(q) || (show.state || '').toLowerCase().includes(q);
       const matchCategory = show.category.toLowerCase().includes(q);
       if (!matchName && !matchCity && !matchCategory) return false;
     }
-
-    // Lead time cutoff filter if enabled
     if (hideShortLeadShows) {
       const days = getDaysUntilEvent(show.dates, show.year);
-      if (days !== null && days <= leadTimeCutoffDays) {
-        return false;
-      }
+      if (days !== null && days <= leadTimeCutoffDays) return false;
     }
-
     return true;
   });
 
   const displayedGridShows = showLimit ? filteredShows.slice(0, showLimit) : filteredShows;
 
-  const totalExhibitorsAllShows = shows.reduce(
-    (sum, s) => sum + (s.exhibitors ? s.exhibitors.length : 0),
-    0
-  );
+  const totalExhibitorsAllShows = shows.reduce((sum, s) => sum + (s.exhibitors ? s.exhibitors.length : 0), 0);
+  const totalLeadsAllShows = shows.reduce((sum, s) =>
+    sum + (s.exhibitors ? s.exhibitors.reduce((acc, ex) => acc + (ex.decisionMakers ? ex.decisionMakers.length : 0), 0) : 0), 0);
 
-  const totalLeadsAllShows = shows.reduce(
-    (sum, s) =>
-      sum +
-      (s.exhibitors
-        ? s.exhibitors.reduce(
-            (acc, ex) => acc + (ex.decisionMakers ? ex.decisionMakers.length : 0),
-            0
-          )
-        : 0),
-    0
-  );
+  const activeTab = COUNTRY_TABS.find(t => t.key === activeCountry) || COUNTRY_TABS[0];
 
   return (
     <div id="trade-show-selector-section" className="bg-slate-50 border-b border-slate-200 p-4 sm:p-5">
       <div className="max-w-7xl mx-auto space-y-4">
-        
-        {/* Section Header & 1,417 USA Shows Explanation Banner */}
+
+        {/* Country Selector Tab Bar */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center mr-2 text-xs font-bold text-slate-500 uppercase tracking-wider shrink-0">
+            <Globe className="w-3.5 h-3.5 mr-1.5 text-blue-500" />
+            Region:
+          </div>
+          {COUNTRY_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => onFetchDirectory(tab.key)}
+              disabled={isFetchingDirectory}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition disabled:opacity-50 ${
+                activeCountry === tab.key
+                  ? 'bg-blue-600 text-white border-blue-700 shadow-sm'
+                  : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50'
+              }`}
+            >
+              <span className="text-base leading-none">{tab.flag}</span>
+              <span>{tab.label}</span>
+              {activeCountry === tab.key && isFetchingDirectory && (
+                <RefreshCw className="w-3 h-3 animate-spin ml-0.5" />
+              )}
+            </button>
+          ))}
+
+          {/* Refresh button for active country */}
+          <button
+            onClick={() => onFetchDirectory(activeCountry)}
+            disabled={isFetchingDirectory}
+            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700 transition disabled:opacity-50"
+            title={`Re-fetch ${activeTab.label} trade show directory`}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isFetchingDirectory ? 'animate-spin text-emerald-500' : 'text-slate-400'}`} />
+            {isFetchingDirectory ? 'Loading...' : `Refresh ${activeTab.flag} ${activeTab.label}`}
+          </button>
+        </div>
+
+        {/* Section Info Banner */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl p-3.5 shadow-xs">
-          
           <div className="flex items-start space-x-3">
             <div className="h-9 w-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
               <Database className="w-5 h-5 text-blue-600" />
@@ -97,10 +133,11 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
             <div>
               <div className="flex items-center space-x-2 flex-wrap gap-1">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 font-sans">
-                  Orbus USA Trade Show Source Directory
+                  {activeTab.flag} {activeTab.label} Trade Show Directory
                 </h2>
                 <span className="text-[11px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold border border-blue-200">
-                  {shows.length} Shows Loaded ({TOTAL_ORBUS_USA_SHOWS_COUNT.toLocaleString()} USA Roster Index)
+                  {shows.length} Shows Loaded
+                  {activeCountry === 'usa' && ` (${TOTAL_ORBUS_USA_SHOWS_COUNT.toLocaleString()} USA Roster Index)`}
                 </span>
                 <span className="text-[11px] bg-amber-50 text-amber-800 px-2 py-0.5 rounded font-medium border border-amber-200 flex items-center">
                   <Clock className="w-3 h-3 mr-1 text-amber-600" />
@@ -108,12 +145,11 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                Showing <strong>{shows.length} featured USA trade shows</strong> pre-loaded into your active dashboard. Click <strong>Extract Exhibitors</strong> to pull, extract, or add any of the remaining <strong>{TOTAL_ORBUS_USA_SHOWS_COUNT.toLocaleString()} USA events</strong> in real-time.
+                Click a country tab above to load its trade show directory. Then click <strong>Extract Companies & Leads</strong> on any show.
               </p>
             </div>
           </div>
 
-          {/* Lead Time Cutoff Filter Toggle & Settings Link */}
           <div className="flex items-center space-x-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
             <label className="flex items-center space-x-2 text-xs font-semibold text-slate-700 cursor-pointer select-none bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg transition">
               <input
@@ -124,7 +160,6 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
               />
               <span>Exclude events &lt; {leadTimeCutoffDays} days away</span>
             </label>
-
             <button
               onClick={onOpenSettings}
               className="text-xs font-semibold text-blue-600 hover:text-blue-700 underline flex items-center"
@@ -132,12 +167,10 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
               Configure Cutoff
             </button>
           </div>
-
         </div>
 
         {/* Filters Bar: Search & State Filter */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          
           <div className="flex items-center space-x-3 flex-1 max-w-md">
             <div className="relative w-full">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -152,29 +185,31 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
           </div>
 
           <div className="flex items-center space-x-3">
-            <span className="text-xs text-slate-500 font-medium">Filter State:</span>
-            <select
-              value={selectedStateFilter}
-              onChange={(e) => onStateFilterChange(e.target.value)}
-              className="bg-white border border-slate-200 text-slate-800 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs font-medium"
-            >
-              <option value="">All USA States ({shows.length} shows)</option>
-              {availableStates.map((st) => (
-                <option key={st} value={st}>
-                  {st} State ({shows.filter((s) => s.state === st).length} shows)
-                </option>
-              ))}
-            </select>
-
+            {availableStates.length > 0 && (
+              <>
+                <span className="text-xs text-slate-500 font-medium">Filter Region:</span>
+                <select
+                  value={selectedStateFilter}
+                  onChange={(e) => onStateFilterChange(e.target.value)}
+                  className="bg-white border border-slate-200 text-slate-800 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs font-medium"
+                >
+                  <option value="">All ({shows.length} shows)</option>
+                  {availableStates.map((st) => (
+                    <option key={st} value={st}>
+                      {st} ({shows.filter((s) => s.state === st).length} shows)
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
             <button
               onClick={onOpenExtractor}
               className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition"
             >
               <Sparkles className="w-3.5 h-3.5 mr-1" />
-              Fetch Any USA Show
+              Fetch Any Show
             </button>
           </div>
-
         </div>
 
         {/* Trade Show Event Cards Grid */}

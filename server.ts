@@ -310,6 +310,128 @@ app.post('/api/extract/orbus', async (_req, res) => {
   }
 });
 
+// 2b. International Trade Show Directory — fetch shows by country using Gemini search
+const COUNTRY_CONFIG: Record<string, { name: string; searchQuery: string; flag: string }> = {
+  usa:       { name: 'United States',   flag: '🇺🇸', searchQuery: 'major USA trade shows exhibitions 2026 list exhibitors booth' },
+  germany:   { name: 'Germany',          flag: '🇩🇪', searchQuery: 'Germany Messe trade shows exhibitions 2026 Frankfurt München Düsseldorf exhibitors list' },
+  uk:        { name: 'United Kingdom',   flag: '🇬🇧', searchQuery: 'UK trade shows exhibitions 2026 London ExCeL NEC Birmingham exhibitors list' },
+  turkey:    { name: 'Turkey',           flag: '🇹🇷', searchQuery: 'Turkey Istanbul fuar trade shows exhibitions 2026 TÜYAP CNR Expo exhibitors list' },
+  uae:       { name: 'UAE / Dubai',      flag: '🇦🇪', searchQuery: 'Dubai UAE trade shows exhibitions 2026 DWTC ADNEC exhibitors list' },
+  france:    { name: 'France',           flag: '🇫🇷', searchQuery: 'France Paris trade shows exhibitions 2026 Paris Nord Villepinte exhibitors list' },
+  china:     { name: 'China',            flag: '🇨🇳', searchQuery: 'China trade shows exhibitions 2026 Shanghai Guangzhou Canton Fair exhibitors list' },
+  italy:     { name: 'Italy',            flag: '🇮🇹', searchQuery: 'Italy Milan trade shows exhibitions 2026 Fiera Milano exhibitors list' },
+  spain:     { name: 'Spain',            flag: '🇪🇸', searchQuery: 'Spain Madrid Barcelona trade shows exhibitions 2026 IFEMA Fira exhibitors list' },
+  global:    { name: 'Global / All',     flag: '🌐', searchQuery: 'major international trade shows exhibitions worldwide 2026 exhibitors list' },
+};
+
+app.post('/api/extract/directory', async (req, res) => {
+  const { country = 'usa' } = req.body;
+
+  // For USA, use the proven Orbus scraper
+  if (country === 'usa') {
+    try {
+      const targetUrl = 'https://thetradeshowcalendar.com/orbus/index.php?vRpP=4500';
+      const response = await fetch(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+      });
+      if (!response.ok) throw new Error(`Orbus fetch failed: ${response.status}`);
+      const pageHtml = await response.text();
+      const $ = cheerio.load(pageHtml);
+      const events: any[] = [];
+
+      $('tr.row').each((_, el) => {
+        const ctry = $(el).find('.r-Ctry').text().trim();
+        if (ctry !== 'United States') return;
+        const nameEl = $(el).find('.r-Name a');
+        const eventName = nameEl.text().trim();
+        let officialWebsite = nameEl.attr('href') || '';
+        if (officialWebsite.startsWith('//')) officialWebsite = 'https:' + officialWebsite;
+        const dates = $(el).find('.r-Dates').text().trim();
+        const cityState = $(el).find('.r-City').text().trim();
+        const parts = cityState.split(',');
+        const city = parts[0]?.trim() || '';
+        const state = parts[1]?.trim() || '';
+        const attendees = parseInt($(el).find('.r-Att').text().replace(/\D/g, ''), 10) || 0;
+        const exhibitors = parseInt($(el).find('.r-Exh').text().replace(/\D/g, ''), 10) || 0;
+        const yearMatch = dates.match(/\d{4}/);
+        const year = yearMatch ? parseInt(yearMatch[0], 10) : 2026;
+        const monthPart = dates.split('/')[0] || '';
+        const months: Record<string, string> = { JAN:'January',FEB:'February',MAR:'March',APR:'April',MAY:'May',JUN:'June',JUL:'July',AUG:'August',SEP:'September',OCT:'October',NOV:'November',DEC:'December' };
+        const month = months[monthPart.toUpperCase()] || monthPart;
+        if (eventName) {
+          events.push({ eventName, shortName: eventName, category: 'Trade Show', city, state, country: 'USA', venue: '', dates, month, year, officialWebsite, estimatedExhibitorsCount: exhibitors, attendees, exhibitors: [] });
+        }
+      });
+
+      console.log(`[Directory] USA: extracted ${events.length} events from Orbus`);
+      return res.json({ success: true, country: 'usa', countryName: 'United States', flag: '🇺🇸', totalCount: events.length, events });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  // For international countries, use Gemini search grounding
+  const cfg = COUNTRY_CONFIG[country];
+  if (!cfg) return res.status(400).json({ error: `Unknown country: ${country}` });
+
+  try {
+    const ai = getGenAI();
+    console.log(`[Directory] Searching for ${cfg.name} trade shows via Gemini...`);
+
+    const searchRes = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `List 30–50 major trade shows and industry exhibitions in ${cfg.name} for 2025-2026. Include: event name, city, venue, dates, industry/category, estimated number of exhibitors, official website. ${cfg.searchQuery}`,
+      config: { tools: [{ googleSearch: {} }] },
+    });
+
+    const rawText = searchRes.text || '';
+    logExtraction('intl_directory_search', { country, contentLength: rawText.length });
+
+    const structRes = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Convert this list of international trade shows into a JSON array. Each item should have: eventName, shortName, category, city, state (use region/province if applicable), country, venue, dates, month, year (number), officialWebsite, estimatedExhibitorsCount (number). Return ONLY the JSON array.
+
+TEXT:
+${rawText}`,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              eventName: { type: Type.STRING },
+              shortName: { type: Type.STRING },
+              category: { type: Type.STRING },
+              city: { type: Type.STRING },
+              state: { type: Type.STRING },
+              country: { type: Type.STRING },
+              venue: { type: Type.STRING },
+              dates: { type: Type.STRING },
+              month: { type: Type.STRING },
+              year: { type: Type.NUMBER },
+              officialWebsite: { type: Type.STRING },
+              estimatedExhibitorsCount: { type: Type.NUMBER },
+            },
+            required: ['eventName', 'city', 'country']
+          }
+        }
+      }
+    });
+
+    const events = JSON.parse(structRes.text || '[]').map((ev: any) => ({ ...ev, exhibitors: [] }));
+    console.log(`[Directory] ${cfg.name}: found ${events.length} events via Gemini`);
+    return res.json({ success: true, country, countryName: cfg.name, flag: cfg.flag, totalCount: events.length, events });
+  } catch (err: any) {
+    console.error(`[Directory] ${country} search failed:`, err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
 app.post('/api/search/tradeshow', async (req, res) => {
   try {
     const { query, city, state } = req.body;
