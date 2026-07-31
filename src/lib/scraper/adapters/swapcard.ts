@@ -13,19 +13,24 @@ export class SwapcardAdapter implements ScraperAdapter {
 
   async extractExhibitors(url: string, html: string, page: any, interceptedXhr: any[]): Promise<ExhibitorData[]> {
     const exhibitors: ExhibitorData[] = [];
+    const seenNames = new Set<string>();
     
     // Swapcard uses GraphQL endpoints
     for (const xhr of interceptedXhr) {
       if (xhr.url.includes('graphql') && xhr.json && xhr.json.data) {
-        // Simple search for nodes that might be exhibitors
-        const searchNodes = (obj: any) => {
-          if (!obj || typeof obj !== 'object') return;
+        const visited = new WeakSet();
+        const searchNodes = (obj: any, depth = 0) => {
+          if (!obj || typeof obj !== 'object' || depth > 15) return;
+          if (visited.has(obj)) return;
+          visited.add(obj);
+
           if (Array.isArray(obj)) {
-            obj.forEach(searchNodes);
+            obj.forEach(item => searchNodes(item, depth + 1));
           } else {
             if (obj.__typename === 'Exhibitor' || obj.__typename === 'Organization' || obj.companyName) {
               const name = obj.name || obj.companyName;
-              if (name) {
+              if (name && !seenNames.has(name.toLowerCase())) {
+                seenNames.add(name.toLowerCase());
                 exhibitors.push({
                   companyName: name,
                   boothNumber: obj.booth || null,
@@ -38,7 +43,7 @@ export class SwapcardAdapter implements ScraperAdapter {
                 });
               }
             }
-            Object.values(obj).forEach(searchNodes);
+            Object.values(obj).forEach(val => searchNodes(val, depth + 1));
           }
         };
         searchNodes(xhr.json.data);

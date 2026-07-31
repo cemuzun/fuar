@@ -156,30 +156,10 @@ export const Header: React.FC<HeaderProps> = ({
             );
           })}
 
-          <div className="h-7 w-px bg-slate-200 shrink-0" />
-          <div className="text-center shrink-0">
-            <button
-              onClick={onOpenSettings}
-              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-slate-800 text-white hover:bg-slate-700 transition shadow-xs cursor-pointer"
-              title="Open Settings"
-            >
-              <Settings className="w-3 h-3 mr-1 text-amber-400" />
-              Settings
-            </button>
-          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex items-center flex-wrap gap-2 sm:gap-2.5 shrink-0">
-          <button
-            onClick={onOpenSettings}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white transition shadow-xs cursor-pointer"
-            title="Configure lead time cutoff, decision rules & custom metrics"
-          >
-            <Settings className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
-            <span>Settings ({decisionSettings.leadTimeCutoffDays}d Cutoff)</span>
-          </button>
-
           <button
             onClick={onRefreshOrbus}
             disabled={isSyncing}

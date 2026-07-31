@@ -5,7 +5,7 @@ export interface ExhibitorData {
   companyWebsite: string | null;
   sourceUrl: string;
   sourceEvidence: string;
-  extractionMethod: 'json' | 'html' | 'ai' | 'fallback' | 'deterministic' | 'expoplatform_json' | 'expoplatform_dom';
+  extractionMethod: 'json' | 'html' | 'ai' | 'fallback' | 'deterministic' | 'expoplatform_json' | 'expoplatform_dom' | 'text-pattern-fallback';
   confidence: number;
   industry?: string;
   description?: string;

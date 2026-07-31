@@ -87,6 +87,8 @@ export default function App() {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isSyncingOrbus, setIsSyncingOrbus] = useState(false);
+  const [activeCountry, setActiveCountry] = useState<string>('usa');
+  const [isFetchingDirectory, setIsFetchingDirectory] = useState(false);
 
   // Fetch Progress Modal state
   const [isFetchProgressOpen, setIsFetchProgressOpen] = useState(false);
@@ -266,6 +268,65 @@ export default function App() {
     } finally {
       clearInterval(progressInterval);
       setIsSyncingOrbus(false);
+    }
+  };
+
+  // Country directory fetch handler
+  const handleFetchDirectory = async (country: string) => {
+    setActiveCountry(country);
+    setIsFetchingDirectory(true);
+    setNotificationToast({ message: `Loading ${country.toUpperCase()} trade show directory...`, type: 'info' });
+    try {
+      const res = await fetch('/api/extract/directory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ country }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to fetch directory');
+
+      const newShows: TradeShowEvent[] = (data.events || []).map((ev: any, idx: number) => ({
+        id: `ts-dir-${country}-${Date.now()}-${idx}`,
+        eventName: ev.eventName || 'Trade Show',
+        shortName: ev.shortName || ev.eventName || 'Event',
+        category: ev.category || 'Trade Show',
+        city: ev.city || '',
+        state: ev.state || '',
+        venue: ev.venue || '',
+        dates: ev.dates || '',
+        month: ev.month || '',
+        year: ev.year || 2026,
+        orbusUrl: '',
+        officialWebsite: ev.officialWebsite || '',
+        estimatedExhibitorsCount: ev.estimatedExhibitorsCount || 0,
+        extractedExhibitorsCount: 0,
+        isUsa: country === 'usa',
+        exhibitors: [],
+      }));
+
+      // Replace shows for this country (keep other country shows)
+      setShows(prev => {
+        const otherShows = prev.filter(s => !s.id.startsWith(`ts-dir-${country}-`));
+        const seen = new Set(otherShows.map(s => (s.eventName || '').toLowerCase().trim()));
+        const unique = newShows.filter(s => {
+          const key = (s.eventName || '').toLowerCase().trim();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        return [...unique, ...otherShows];
+      });
+
+      setNotificationToast({
+        message: `${data.flag || ''} ${data.countryName}: loaded ${newShows.length} trade shows!`,
+        type: 'success',
+      });
+      setTimeout(() => setNotificationToast(null), 4000);
+    } catch (err: any) {
+      setNotificationToast({ message: `Failed to load directory: ${err.message}`, type: 'info' });
+      setTimeout(() => setNotificationToast(null), 4000);
+    } finally {
+      setIsFetchingDirectory(false);
     }
   };
 
@@ -695,6 +756,9 @@ export default function App() {
             onOpenExtractor={() => setIsExtractorOpen(true)}
             onExtractCompaniesForShow={handleExtractCompaniesForShow}
             isExtractingCompanies={isExtractingCompanies}
+            onFetchDirectory={handleFetchDirectory}
+            isFetchingDirectory={isFetchingDirectory}
+            activeCountry={activeCountry}
           />
 
           <main className="flex-1">

@@ -26,9 +26,23 @@ function logScrapedContent(url: string, content: string, type: 'html' | 'json' =
     fsLib.writeFileSync(filePath, content);
     console.log(`[Scraper Log] Saved raw content for debugging to: ${filePath}`);
   } catch (err: any) {
-    // Error log suppressed
+    console.error('[logScrapedContent] Failed to write log:', err.message);
   }
 }
+
+// Structured extraction event logger — writes to logs/extraction.jsonl
+function logExtraction(step: string, data: Record<string, any>) {
+  try {
+    const logDir = pathLib.join(process.cwd(), 'logs');
+    if (!fsLib.existsSync(logDir)) fsLib.mkdirSync(logDir, { recursive: true });
+    const entry = JSON.stringify({ ts: new Date().toISOString(), step, ...data }) + '\n';
+    fsLib.appendFileSync(pathLib.join(logDir, 'extraction.jsonl'), entry);
+    console.log(`[Extraction Log] ${step}:`, data);
+  } catch (err: any) {
+    console.error('[logExtraction] Failed to write log:', err.message);
+  }
+}
+
 
 
 
@@ -85,7 +99,7 @@ app.post('/api/jobs/start', async (req, res) => {
     const job = jobs.get(jobId);
     if (job) {
       job.status = 'failed';
-      // Error log suppressed
+      console.error(`[Job ${jobId}] Background job crashed:`, err.message || err);
     }
   });
   
@@ -110,61 +124,51 @@ async function processBackgroundJob(jobId: string, payload: any) {
   if (!job) return;
   
   const shows = payload.shows || [];
+  console.log(`[Job ${jobId}] Starting background extraction for ${shows.length} shows`);
+
   for (let i = job.progress; i < shows.length; i++) {
     job.lastHeartbeat = Date.now();
     job.leaseExpiresAt = Date.now() + 5 * 60 * 1000;
     
+    const show = shows[i];
+    console.log(`[Job ${jobId}] Processing show ${i + 1}/${shows.length}: ${show.eventName}`);
+    
     try {
-      const show = shows[i];
-      
-      let extractedExhibitors = [];
-      if (shows.length > 5) {
-        // Fast mock extraction for bulk requests
-        const mockCount = Math.floor(Math.random() * 25) + 10;
-        for (let j=0; j<mockCount; j++) {
-           extractedExhibitors.push({
-              companyName: `Mock Exhibitor ${j+1} (${show.eventName})`,
-              boothNumber: `A-${100+j}`,
-              boothSize: '10x20',
-              boothType: 'Inline',
-              estimatedBoothBudget: '$15,000 - $30,000',
-              industry: show.category || 'B2B',
-              website: `https://www.example${j}.com`,
-              phone: '555-0100',
-              city: show.city || 'Anytown',
-              state: show.state || 'XX',
-              country: 'USA',
-              description: `Leading provider of solutions for the ${show.category} industry.`,
-              decisionMakers: [
-                 { name: `John Doe ${j}`, title: 'VP of Marketing', department: 'Marketing', email: `john${j}@example.com`, phone: '555-0101' }
-              ]
-           });
-        }
-        await new Promise(r => setTimeout(r, 10)); // Super fast delay for bulk
-      } else {
-        const queryParam = show.officialWebsite || show.eventName;
-        extractedExhibitors = await performExtraction(queryParam, show.eventName, show.city, show.state);
-        await new Promise(r => setTimeout(r, 4500)); // Delay for real API
-      }
-      
+      // Always use real extraction — pass URL if available, otherwise event name as search query
+      const extractionTarget = show.officialWebsite || show.eventName;
+      const extractedExhibitors = await performExtraction(
+        extractionTarget,
+        show.eventName, // always pass the show name separately
+        show.city,
+        show.state
+      );
+
+      console.log(`[Job ${jobId}] Show "${show.eventName}": extracted ${extractedExhibitors.length} exhibitors`);
+
       job.results.push({
         showId: show.id,
         showName: show.eventName,
         exhibitors: extractedExhibitors
       });
     } catch (err: any) {
-      // Error log suppressed
+      console.error(`[Job ${jobId}] Extraction failed for show "${show.eventName}":`, err.message);
       job.results.push({
-        showId: shows[i].id,
-        showName: shows[i].eventName,
+        showId: show.id,
+        showName: show.eventName,
+        exhibitors: [],
         error: err.message || 'Extraction failed'
       });
     }
     
     job.progress = i + 1;
+    // Throttle between shows to avoid API rate limits
+    if (i < shows.length - 1) {
+      await new Promise(r => setTimeout(r, 2000));
+    }
   }
   
   job.status = 'completed';
+  console.log(`[Job ${jobId}] Completed. Total results: ${job.results.length}`);
 }
 // ------------------------------
 
@@ -306,6 +310,128 @@ app.post('/api/extract/orbus', async (_req, res) => {
   }
 });
 
+// 2b. International Trade Show Directory — fetch shows by country using Gemini search
+const COUNTRY_CONFIG: Record<string, { name: string; searchQuery: string; flag: string }> = {
+  usa:       { name: 'United States',   flag: '🇺🇸', searchQuery: 'major USA trade shows exhibitions 2026 list exhibitors booth' },
+  germany:   { name: 'Germany',          flag: '🇩🇪', searchQuery: 'Germany Messe trade shows exhibitions 2026 Frankfurt München Düsseldorf exhibitors list' },
+  uk:        { name: 'United Kingdom',   flag: '🇬🇧', searchQuery: 'UK trade shows exhibitions 2026 London ExCeL NEC Birmingham exhibitors list' },
+  turkey:    { name: 'Turkey',           flag: '🇹🇷', searchQuery: 'Turkey Istanbul fuar trade shows exhibitions 2026 TÜYAP CNR Expo exhibitors list' },
+  uae:       { name: 'UAE / Dubai',      flag: '🇦🇪', searchQuery: 'Dubai UAE trade shows exhibitions 2026 DWTC ADNEC exhibitors list' },
+  france:    { name: 'France',           flag: '🇫🇷', searchQuery: 'France Paris trade shows exhibitions 2026 Paris Nord Villepinte exhibitors list' },
+  china:     { name: 'China',            flag: '🇨🇳', searchQuery: 'China trade shows exhibitions 2026 Shanghai Guangzhou Canton Fair exhibitors list' },
+  italy:     { name: 'Italy',            flag: '🇮🇹', searchQuery: 'Italy Milan trade shows exhibitions 2026 Fiera Milano exhibitors list' },
+  spain:     { name: 'Spain',            flag: '🇪🇸', searchQuery: 'Spain Madrid Barcelona trade shows exhibitions 2026 IFEMA Fira exhibitors list' },
+  global:    { name: 'Global / All',     flag: '🌐', searchQuery: 'major international trade shows exhibitions worldwide 2026 exhibitors list' },
+};
+
+app.post('/api/extract/directory', async (req, res) => {
+  const { country = 'usa' } = req.body;
+
+  // For USA, use the proven Orbus scraper
+  if (country === 'usa') {
+    try {
+      const targetUrl = 'https://thetradeshowcalendar.com/orbus/index.php?vRpP=4500';
+      const response = await fetch(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+      });
+      if (!response.ok) throw new Error(`Orbus fetch failed: ${response.status}`);
+      const pageHtml = await response.text();
+      const $ = cheerio.load(pageHtml);
+      const events: any[] = [];
+
+      $('tr.row').each((_, el) => {
+        const ctry = $(el).find('.r-Ctry').text().trim();
+        if (ctry !== 'United States') return;
+        const nameEl = $(el).find('.r-Name a');
+        const eventName = nameEl.text().trim();
+        let officialWebsite = nameEl.attr('href') || '';
+        if (officialWebsite.startsWith('//')) officialWebsite = 'https:' + officialWebsite;
+        const dates = $(el).find('.r-Dates').text().trim();
+        const cityState = $(el).find('.r-City').text().trim();
+        const parts = cityState.split(',');
+        const city = parts[0]?.trim() || '';
+        const state = parts[1]?.trim() || '';
+        const attendees = parseInt($(el).find('.r-Att').text().replace(/\D/g, ''), 10) || 0;
+        const exhibitors = parseInt($(el).find('.r-Exh').text().replace(/\D/g, ''), 10) || 0;
+        const yearMatch = dates.match(/\d{4}/);
+        const year = yearMatch ? parseInt(yearMatch[0], 10) : 2026;
+        const monthPart = dates.split('/')[0] || '';
+        const months: Record<string, string> = { JAN:'January',FEB:'February',MAR:'March',APR:'April',MAY:'May',JUN:'June',JUL:'July',AUG:'August',SEP:'September',OCT:'October',NOV:'November',DEC:'December' };
+        const month = months[monthPart.toUpperCase()] || monthPart;
+        if (eventName) {
+          events.push({ eventName, shortName: eventName, category: 'Trade Show', city, state, country: 'USA', venue: '', dates, month, year, officialWebsite, estimatedExhibitorsCount: exhibitors, attendees, exhibitors: [] });
+        }
+      });
+
+      console.log(`[Directory] USA: extracted ${events.length} events from Orbus`);
+      return res.json({ success: true, country: 'usa', countryName: 'United States', flag: '🇺🇸', totalCount: events.length, events });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  // For international countries, use Gemini search grounding
+  const cfg = COUNTRY_CONFIG[country];
+  if (!cfg) return res.status(400).json({ error: `Unknown country: ${country}` });
+
+  try {
+    const ai = getGenAI();
+    console.log(`[Directory] Searching for ${cfg.name} trade shows via Gemini...`);
+
+    const searchRes = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `List 30–50 major trade shows and industry exhibitions in ${cfg.name} for 2025-2026. Include: event name, city, venue, dates, industry/category, estimated number of exhibitors, official website. ${cfg.searchQuery}`,
+      config: { tools: [{ googleSearch: {} }] },
+    });
+
+    const rawText = searchRes.text || '';
+    logExtraction('intl_directory_search', { country, contentLength: rawText.length });
+
+    const structRes = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Convert this list of international trade shows into a JSON array. Each item should have: eventName, shortName, category, city, state (use region/province if applicable), country, venue, dates, month, year (number), officialWebsite, estimatedExhibitorsCount (number). Return ONLY the JSON array.
+
+TEXT:
+${rawText}`,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              eventName: { type: Type.STRING },
+              shortName: { type: Type.STRING },
+              category: { type: Type.STRING },
+              city: { type: Type.STRING },
+              state: { type: Type.STRING },
+              country: { type: Type.STRING },
+              venue: { type: Type.STRING },
+              dates: { type: Type.STRING },
+              month: { type: Type.STRING },
+              year: { type: Type.NUMBER },
+              officialWebsite: { type: Type.STRING },
+              estimatedExhibitorsCount: { type: Type.NUMBER },
+            },
+            required: ['eventName', 'city', 'country']
+          }
+        }
+      }
+    });
+
+    const events = JSON.parse(structRes.text || '[]').map((ev: any) => ({ ...ev, exhibitors: [] }));
+    console.log(`[Directory] ${cfg.name}: found ${events.length} events via Gemini`);
+    return res.json({ success: true, country, countryName: cfg.name, flag: cfg.flag, totalCount: events.length, events });
+  } catch (err: any) {
+    console.error(`[Directory] ${country} search failed:`, err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+
 app.post('/api/search/tradeshow', async (req, res) => {
   try {
     const { query, city, state } = req.body;
@@ -440,17 +566,17 @@ ${chunk}`;
         return fallbackExhibitors;
       };
       
-      console.log('CALLING SCRAPER WITH URL:', contentToAnalyze);
+      logExtraction('scraper_start', { url: contentToAnalyze, tradeShowName });
       const scrapeResult = await scraper.scrape(contentToAnalyze, tradeShowName, city, state, geminiFallback);
-      console.log('SCRAPER RETURNED:', scrapeResult.exhibitors.length, 'exhibitors');
+      logExtraction('scraper_done', { url: contentToAnalyze, exhibitorCount: scrapeResult.exhibitors.length, diagnostics: scrapeResult.diagnostics });
       extractedExhibitors = scrapeResult.exhibitors;
     } else {
-      console.log('Processing non-URL raw text/HTML extraction, length:', contentToAnalyze.length);
+      logExtraction('text_extraction_start', { contentLength: contentToAnalyze.length, tradeShowName });
 
       // 1. Try deterministic HTML / structure extraction
       const adapter = new GenericDeterministicAdapter();
       extractedExhibitors = await adapter.extractExhibitors('pasted-content', contentToAnalyze, null, []);
-      console.log('Deterministic adapter extracted:', extractedExhibitors.length, 'companies');
+      logExtraction('deterministic_done', { count: extractedExhibitors.length });
 
       // 2. If deterministic finds nothing, or to enrich text, use Gemini AI
       if (!extractedExhibitors || extractedExhibitors.length === 0) {
@@ -489,9 +615,9 @@ ${contentToAnalyze.substring(0, 25000)}`;
             extractionMethod: 'ai',
             confidence: 0.85
           }));
-          console.log('Gemini AI extracted from raw text:', extractedExhibitors.length, 'companies');
+          logExtraction('gemini_text_extraction_done', { count: extractedExhibitors.length });
         } catch (e: any) {
-          console.error('AI extraction for raw text failed/quota:', e.message);
+          logExtraction('gemini_text_extraction_failed', { error: e.message });
           
           // 3. Local pattern-matching fallback parser for line-by-line text
           const lines = contentToAnalyze.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 2 && l.length < 80);
@@ -512,10 +638,12 @@ ${contentToAnalyze.substring(0, 25000)}`;
             }
           }
           extractedExhibitors = fallbackList;
+          logExtraction('text_pattern_fallback_done', { count: extractedExhibitors.length });
         }
       }
     }
     
+    logExtraction('extraction_complete', { tradeShowName, totalExtracted: extractedExhibitors.length });
     return extractedExhibitors;
 }
 
