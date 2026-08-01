@@ -886,7 +886,8 @@ var dbQueries = {
     const exhibitors = Object.values(dbState.exhibitors);
     const decisionMakers = Object.values(dbState.decision_makers);
     return shows.map((s) => {
-      const showExhibitors = exhibitors.filter((ex) => ex.showId === s.id).map((ex) => {
+      const sName = (s.eventName || s.shortName || "").toLowerCase().trim();
+      const showExhibitors = exhibitors.filter((ex) => ex.showId === s.id || ex.tradeShowName && ex.tradeShowName.toLowerCase().trim() === sName).map((ex) => {
         const exDms = decisionMakers.filter((dm) => dm.exhibitorId === ex.id);
         return {
           ...ex,
@@ -895,9 +896,20 @@ var dbQueries = {
       });
       return {
         ...s,
+        extractedExhibitorsCount: Math.max(s.extractedExhibitorsCount || 0, showExhibitors.length),
         exhibitors: showExhibitors
       };
     });
+  },
+  getExhibitorsForShow: (showId) => {
+    const show = dbState.trade_shows[showId];
+    const sName = (show?.eventName || show?.shortName || "").toLowerCase().trim();
+    const exhibitors = Object.values(dbState.exhibitors);
+    const decisionMakers = Object.values(dbState.decision_makers);
+    return exhibitors.filter((ex) => ex.showId === showId || sName && ex.tradeShowName && ex.tradeShowName.toLowerCase().trim() === sName).map((ex) => ({
+      ...ex,
+      decisionMakers: decisionMakers.filter((dm) => dm.exhibitorId === ex.id)
+    }));
   }
 };
 
