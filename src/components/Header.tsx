@@ -88,8 +88,8 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Dynamic Customizable Metrics Strip */}
-        <div className="hidden lg:flex items-center space-x-3.5 border-x border-slate-200 px-3.5 py-1 overflow-x-auto max-w-2xl shrink-0">
+        {/* Dynamic Customizable Metrics Strip (Visible on 2XL wide screens) */}
+        <div className="hidden 2xl:flex items-center space-x-3.5 border-x border-slate-200 px-3.5 py-1 overflow-x-auto max-w-xl shrink-0">
           {visibleHeaderMetrics.map((metric, idx) => {
             return (
               <React.Fragment key={metric.id}>
@@ -159,29 +159,29 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center overflow-x-auto scrollbar-none gap-2 py-0.5 shrink-0 max-w-full">
+        <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 py-0.5 shrink-0 max-w-full">
           <button
             onClick={onRefreshOrbus}
             disabled={isSyncing}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition disabled:opacity-50 shadow-xs shrink-0 whitespace-nowrap"
+            className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition disabled:opacity-50 shadow-xs shrink-0 whitespace-nowrap"
             title="Sync Orbus USA Trade Show List directly"
           >
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isSyncing ? 'animate-spin text-blue-600' : 'text-slate-400'}`} />
-            {isSyncing ? 'Syncing Orbus...' : 'Fetch Orbus List'}
+            {isSyncing ? 'Syncing...' : 'Fetch Orbus List'}
           </button>
 
           <button
             onClick={onOpenExtractor}
-            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
             title="3-Step Lead Extraction Wizard (Find Trade Show ➔ Extract Companies ➔ Discover Decision Maker Leads)"
           >
-            <Sparkles className="w-4 h-4 mr-1.5 text-amber-300" />
-            3-Step Lead Extractor
+            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-300" />
+            3-Step Extractor
           </button>
 
           <button
             onClick={onOpenAnalytics}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-xs shrink-0 whitespace-nowrap"
+            className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-xs shrink-0 whitespace-nowrap"
           >
             <BarChart2 className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
             Analytics
@@ -189,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenExport}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
+            className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
           >
             <Download className="w-3.5 h-3.5 mr-1.5" />
             Export
@@ -197,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenSettings}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
+            className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
             title="Configure lead time cutoff, email settings, & metrics"
           >
             <Settings className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
