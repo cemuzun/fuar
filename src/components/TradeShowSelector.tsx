@@ -54,13 +54,15 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
 }) => {
   const [showSearch, setShowSearch] = useState('');
   const [showLimit, setShowLimit] = useState<number>(10);
+  const [onlyExtracted, setOnlyExtracted] = useState<boolean>(false);
 
   // Extract unique states/regions from the available shows
   const availableStates = Array.from(new Set(shows.map((s) => s.state).filter(Boolean))).sort();
 
-  // Filter shows based on state, search, and lead time cutoff
+  // Filter shows based on state, search, lead time, and extraction status
   const filteredShows = shows.filter((show) => {
     if (selectedStateFilter && show.state !== selectedStateFilter) return false;
+    if (onlyExtracted && (!show.exhibitors || show.exhibitors.length === 0)) return false;
     if (showSearch.trim()) {
       const q = showSearch.toLowerCase();
       const matchName = (show.eventName || '').toLowerCase().includes(q) || (show.shortName || '').toLowerCase().includes(q);
@@ -73,8 +75,15 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
       if (days !== null && days <= leadTimeCutoffDays) return false;
     }
     return true;
+  }).sort((a, b) => {
+    // Sort shows with extracted exhibitors to the very top
+    const countA = a.exhibitors ? a.exhibitors.length : 0;
+    const countB = b.exhibitors ? b.exhibitors.length : 0;
+    if (countB !== countA) return countB - countA;
+    return 0;
   });
 
+  const extractedShowsCount = shows.filter(s => s.exhibitors && s.exhibitors.length > 0).length;
   const displayedGridShows = showLimit ? filteredShows.slice(0, showLimit) : filteredShows;
 
   const totalExhibitorsAllShows = shows.reduce((sum, s) => sum + (s.exhibitors ? s.exhibitors.length : 0), 0);
@@ -202,6 +211,17 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
                 </select>
               </>
             )}
+            <button
+              onClick={() => setOnlyExtracted(!onlyExtracted)}
+              className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                onlyExtracted
+                  ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs font-bold'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+              Extracted Only ({extractedShowsCount})
+            </button>
             <button
               onClick={onOpenExtractor}
               className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition"
