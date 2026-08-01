@@ -49,8 +49,8 @@ export const INITIAL_USA_TRADE_SHOWS: TradeShowEvent[] = [
     month: 'August',
     year: 2026,
     orbusUrl: 'https://www.orbus.com/about-us/usa-tradeshow-list',
-    officialWebsite: 'https://www.magicfashionevents.com',
-    estimatedExhibitorsCount: 1800,
+    officialWebsite: 'https://lasvegasaug.fashionresource.com/marketplace/exhibitors',
+    estimatedExhibitorsCount: 2004,
     extractedExhibitorsCount: 0,
     isUsa: true,
     exhibitors: []
