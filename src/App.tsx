@@ -25,7 +25,27 @@ export default function App() {
     const saved = localStorage.getItem('tradeshow-shows-v3');
     if (saved) {
       try {
-        initial = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const initialMap = new Map<string, TradeShowEvent>();
+          INITIAL_USA_TRADE_SHOWS.forEach(s => {
+            const key = (s.eventName || '').toLowerCase().trim() + (s.year || '');
+            initialMap.set(key, s);
+          });
+
+          initial = parsed.map((s: TradeShowEvent) => {
+            const key = (s.eventName || '').toLowerCase().trim() + (s.year || '');
+            const initShow = initialMap.get(key);
+            if (initShow) {
+              const savedCount = (s.exhibitors ? s.exhibitors.length : 0) || s.extractedExhibitorsCount || 0;
+              const initCount = (initShow.exhibitors ? initShow.exhibitors.length : 0) || initShow.extractedExhibitorsCount || 0;
+              if (initCount > savedCount) {
+                return initShow;
+              }
+            }
+            return s;
+          });
+        }
       } catch (e) {
         initial = INITIAL_USA_TRADE_SHOWS;
       }
