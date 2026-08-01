@@ -163,7 +163,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onRefreshOrbus}
             disabled={isSyncing}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition disabled:opacity-50 shadow-xs"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition disabled:opacity-50 shadow-xs shrink-0"
             title="Sync Orbus USA Trade Show List directly"
           >
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isSyncing ? 'animate-spin text-blue-600' : 'text-slate-400'}`} />
@@ -172,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenExtractor}
-            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition"
+            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition shrink-0"
             title="3-Step Lead Extraction Wizard (Find Trade Show ➔ Extract Companies ➔ Discover Decision Maker Leads)"
           >
             <Sparkles className="w-4 h-4 mr-1.5 text-amber-300" />
@@ -181,7 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenAnalytics}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-xs"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-xs shrink-0"
           >
             <BarChart2 className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
             Analytics
@@ -189,10 +189,19 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenExport}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition shrink-0"
           >
             <Download className="w-3.5 h-3.5 mr-1.5" />
             Export
+          </button>
+
+          <button
+            onClick={onOpenSettings}
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white shadow-xs transition shrink-0"
+            title="Configure lead time cutoff, email settings, & metrics"
+          >
+            <Settings className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
+            Settings
           </button>
         </div>
 
@@ -201,17 +210,17 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Main View Switcher Navigation Tab Bar */}
       {onViewChange && (
         <div className="bg-slate-100/80 border-t border-slate-200 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 py-1.5">
-            <div className="flex flex-wrap items-center gap-1.5">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 py-1.5 overflow-x-auto scrollbar-none">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={() => onViewChange('shows')}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 shrink-0 whitespace-nowrap ${
                   activeView === 'shows'
                     ? 'bg-white text-blue-700 shadow-xs border border-slate-200'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Building2 className="w-4 h-4 text-blue-600" />
+                <Building2 className="w-4 h-4 text-blue-600 shrink-0" />
                 <span>Trade Shows & Exhibitors Directory</span>
                 <span className="bg-blue-50 text-blue-700 px-2 py-0.2 text-[10px] rounded-full font-extrabold border border-blue-200">
                   {totalExhibitors}
@@ -220,13 +229,13 @@ export const Header: React.FC<HeaderProps> = ({
 
               <button
                 onClick={() => onViewChange('leads')}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 shrink-0 whitespace-nowrap ${
                   activeView === 'leads'
                     ? 'bg-white text-blue-700 shadow-xs border border-slate-200'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Users className="w-4 h-4 text-emerald-600" />
+                <Users className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Leads & Decision Maker Page</span>
                 <span className="bg-emerald-50 text-emerald-700 px-2 py-0.2 text-[10px] rounded-full font-extrabold border border-emerald-200">
                   {decisionMakersCount} Leads
@@ -235,13 +244,13 @@ export const Header: React.FC<HeaderProps> = ({
 
               <button
                 onClick={() => onViewChange('inbox')}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 shrink-0 whitespace-nowrap ${
                   activeView === 'inbox'
                     ? 'bg-slate-900 text-white shadow-xs border border-slate-800'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Mail className={`w-4 h-4 ${activeView === 'inbox' ? 'text-blue-400' : 'text-blue-600'}`} />
+                <Mail className={`w-4 h-4 shrink-0 ${activeView === 'inbox' ? 'text-blue-400' : 'text-blue-600'}`} />
                 <span>Mailbox ({userEmail.split('@')[0]})</span>
                 <span className={`px-2 py-0.2 text-[10px] rounded-full font-extrabold border ${
                   activeView === 'inbox'
@@ -254,22 +263,22 @@ export const Header: React.FC<HeaderProps> = ({
 
               <button
                 onClick={() => onViewChange && onViewChange('scraper-debug')}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 shrink-0 whitespace-nowrap ${
                   activeView === 'scraper-debug'
                     ? 'bg-slate-900 text-white shadow-xs border border-slate-800'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Bug className={`w-4 h-4 ${activeView === 'scraper-debug' ? 'text-amber-400' : 'text-amber-600'}`} />
+                <Bug className={`w-4 h-4 shrink-0 ${activeView === 'scraper-debug' ? 'text-amber-400' : 'text-amber-600'}`} />
                 <span>Debug Logs</span>
               </button>
 
               <button
                 onClick={onOpenSettings}
-                className="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-slate-800 text-white hover:bg-slate-700 shadow-xs cursor-pointer shrink-0"
+                className="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-slate-800 text-white hover:bg-slate-700 shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
                 title="Configure lead time cutoff, email settings, & metrics"
               >
-                <Settings className="w-4 h-4 text-amber-400" />
+                <Settings className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>Settings</span>
               </button>
             </div>
