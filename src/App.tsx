@@ -49,9 +49,25 @@ export default function App() {
       .then(data => {
         if (data.success && Array.isArray(data.shows) && data.shows.length > 0) {
           setShows(prev => {
-            const seen = new Set(data.shows.map((s: any) => (s.eventName || '').toLowerCase().trim()));
-            const uniquePrev = prev.filter(s => !seen.has((s.eventName || '').toLowerCase().trim()));
-            return [...data.shows, ...uniquePrev];
+            const dbMap = new Map<string, any>();
+            data.shows.forEach((s: any) => {
+              const key = (s.eventName || '').toLowerCase().trim();
+              dbMap.set(key, s);
+            });
+            // Merge prev with dbMap, giving precedence to dbMap when it has exhibitors
+            const merged = prev.map(s => {
+              const key = (s.eventName || '').toLowerCase().trim();
+              const dbShow = dbMap.get(key);
+              if (dbShow) {
+                dbMap.delete(key); // handled
+                const prevCount = s.exhibitors ? s.exhibitors.length : (s.extractedExhibitorsCount || 0);
+                const dbCount = dbShow.exhibitors ? dbShow.exhibitors.length : (dbShow.extractedExhibitorsCount || 0);
+                return dbCount >= prevCount ? dbShow : s;
+              }
+              return s;
+            });
+            // Add remaining dbShow entries
+            return [...Array.from(dbMap.values()), ...merged];
           });
         }
       })

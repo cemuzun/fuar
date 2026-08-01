@@ -84,6 +84,12 @@ export const dbQueries = {
     if (!show || !show.id) return;
     const existing = dbState.trade_shows[show.id] || {};
     
+    const incomingCount = (Array.isArray(show.exhibitors) && show.exhibitors.length > 0)
+      ? show.exhibitors.length
+      : (show.extractedExhibitorsCount || 0);
+    const existingCount = existing.extractedExhibitorsCount || 0;
+    const finalCount = Math.max(incomingCount, existingCount);
+
     dbState.trade_shows[show.id] = {
       id: show.id,
       eventName: show.eventName || existing.eventName || 'Trade Show',
@@ -99,12 +105,12 @@ export const dbQueries = {
       orbusUrl: show.orbusUrl || existing.orbusUrl || '',
       officialWebsite: show.officialWebsite || existing.officialWebsite || '',
       estimatedExhibitorsCount: show.estimatedExhibitorsCount || existing.estimatedExhibitorsCount || 0,
-      extractedExhibitorsCount: show.extractedExhibitorsCount || (show.exhibitors ? show.exhibitors.length : 0),
+      extractedExhibitorsCount: finalCount,
       isUsa: show.isUsa ?? existing.isUsa ?? true,
       updatedAt: new Date().toISOString()
     };
 
-    if (Array.isArray(show.exhibitors)) {
+    if (Array.isArray(show.exhibitors) && show.exhibitors.length > 0) {
       for (const ex of show.exhibitors) {
         dbQueries.upsertExhibitor(show.id, ex);
       }
