@@ -604,8 +604,10 @@ export default function App() {
              newTotalExhibitors += exLength;
              newTotalLeads += leLength;
              
-             if (exLength > 0) {
-               updatesByShowId.set(targetShow.id, additionalExhibitors);
+             const existingExhibitors = targetShow.exhibitors || [];
+             const mergedExhibitors = additionalExhibitors.length >= existingExhibitors.length ? additionalExhibitors : existingExhibitors;
+             if (mergedExhibitors.length > 0) {
+               updatesByShowId.set(targetShow.id, mergedExhibitors);
              }
              
              if (logFeed.length < 50) {

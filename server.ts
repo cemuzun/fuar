@@ -165,21 +165,30 @@ async function processBackgroundJob(jobId: string, payload: any) {
     console.log(`[Job ${jobId}] Processing show ${i + 1}/${shows.length}: ${show.eventName}`);
     
     try {
+      // Check stored DB state first
+      const storedExhibitors = dbQueries.getExhibitorsForShow(show.id) || [];
+
       // Always use real extraction — pass URL if available, otherwise event name as search query
-      const extractionTarget = show.officialWebsite || show.eventName;
-      const extractedExhibitors = await performExtraction(
+      const extractionTarget = (show.officialWebsite && show.officialWebsite.includes('http')) 
+        ? show.officialWebsite 
+        : show.eventName;
+        
+      const scrapedExhibitors = await performExtraction(
         extractionTarget,
         show.eventName, // always pass the show name separately
         show.city,
         show.state
       );
 
-      console.log(`[Job ${jobId}] Show "${show.eventName}": extracted ${extractedExhibitors.length} exhibitors`);
+      const finalExhibitors = (scrapedExhibitors.length >= storedExhibitors.length)
+        ? scrapedExhibitors
+        : storedExhibitors;
+
+      console.log(`[Job ${jobId}] Show "${show.eventName}": returning ${finalExhibitors.length} exhibitors (scraped: ${scrapedExhibitors.length}, stored: ${storedExhibitors.length})`);
 
       job.results.push({
         showId: show.id,
-        showName: show.eventName,
-        exhibitors: extractedExhibitors
+        exhibitors: finalExhibitors
       });
     } catch (err: any) {
       console.error(`[Job ${jobId}] Extraction failed for show "${show.eventName}":`, err.message);
