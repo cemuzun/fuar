@@ -40,8 +40,8 @@ export const PipelineDashboard: React.FC<PipelineDashboardProps> = ({
   });
 
   // Breakdown by booth type/size
-  const islandCount = exhibitors.filter((e) => e.boothSize.toLowerCase().includes('island') || e.boothType === 'Island').length;
-  const midCount = exhibitors.filter((e) => e.boothSize.includes('20x20') || e.boothSize.includes('20x30')).length;
+  const islandCount = exhibitors.filter((e) => (e.boothSize || '').toLowerCase().includes('island') || e.boothType === 'Island').length;
+  const midCount = exhibitors.filter((e) => (e.boothSize || '').includes('20x20') || (e.boothSize || '').includes('20x30')).length;
   const inlineCount = totalExhibitors - islandCount - midCount;
 
   // Outreach status breakdown
