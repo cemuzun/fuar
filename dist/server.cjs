@@ -920,10 +920,10 @@ var DirectoryScraper = class {
         }
       });
       try {
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 3e4 });
-        await page.waitForTimeout(4e3);
-      } catch (e) {
+        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 25e3 });
         await page.waitForTimeout(3e3);
+      } catch (e) {
+        console.warn(`[Scraper] page.goto warning: ${e.message}`);
       }
       htmlText = await page.content();
     } catch (e) {

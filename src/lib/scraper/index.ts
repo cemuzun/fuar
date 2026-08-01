@@ -93,10 +93,10 @@ export class DirectoryScraper {
       });
 
       try {
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-        await page.waitForTimeout(4000);
-      } catch (e) {
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 });
         await page.waitForTimeout(3000);
+      } catch (e: any) {
+        console.warn(`[Scraper] page.goto warning: ${e.message}`);
       }
 
       htmlText = await page.content();
