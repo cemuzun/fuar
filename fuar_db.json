@@ -17,7 +17,7 @@
       "estimatedExhibitorsCount": 2500,
       "extractedExhibitorsCount": 0,
       "isUsa": true,
-      "updatedAt": "2026-08-01T13:23:38.262Z"
+      "updatedAt": "2026-08-01T13:25:59.532Z"
     },
     "ts-orbus-2": {
       "id": "ts-orbus-2",
@@ -36,7 +36,7 @@
       "estimatedExhibitorsCount": 2400,
       "extractedExhibitorsCount": 0,
       "isUsa": true,
-      "updatedAt": "2026-08-01T13:23:38.263Z"
+      "updatedAt": "2026-08-01T13:25:59.533Z"
     },
     "ts-orbus-3": {
       "id": "ts-orbus-3",
@@ -55,7 +55,7 @@
       "estimatedExhibitorsCount": 1800,
       "extractedExhibitorsCount": 0,
       "isUsa": true,
-      "updatedAt": "2026-08-01T13:23:38.265Z"
+      "updatedAt": "2026-08-01T13:25:59.533Z"
     },
     "ts-orbus-4": {
       "id": "ts-orbus-4",
@@ -74,7 +74,7 @@
       "estimatedExhibitorsCount": 1000,
       "extractedExhibitorsCount": 0,
       "isUsa": true,
-      "updatedAt": "2026-08-01T13:23:38.265Z"
+      "updatedAt": "2026-08-01T13:25:59.533Z"
     },
     "ts-orbus-5": {
       "id": "ts-orbus-5",
@@ -93,7 +93,7 @@
       "estimatedExhibitorsCount": 1100,
       "extractedExhibitorsCount": 0,
       "isUsa": true,
-      "updatedAt": "2026-08-01T13:23:38.266Z"
+      "updatedAt": "2026-08-01T13:25:59.534Z"
     }
   },
   "exhibitors": {},

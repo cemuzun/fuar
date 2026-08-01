@@ -1083,22 +1083,31 @@ app.get('/api/mock_directory', (req, res) => {
 
 // Vite Integration for dev / production static serve
 async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
+  const isProd = process.env.NODE_ENV === 'production' || process.env.SERVE_DIST === 'true';
+
+  if (isProd) {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath, {
+      maxAge: 0,
+      etag: false,
+      setHeaders: (res) => {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      }
+    }));
+    app.get('*', (_req, res) => {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  } else {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Server running on http://0.0.0.0:${PORT} (mode: ${isProd ? 'production/dist' : 'vite-dev'})`);
   });
 }
 
