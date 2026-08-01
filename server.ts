@@ -29,13 +29,19 @@ function logScrapedContent(url: string, content: string, type: 'html' | 'json' =
   }
 }
 
-// Structured extraction event logger — writes to logs/extraction.jsonl
+// Structured extraction event logger — writes to logs/extraction.jsonl and logs/extraction_errors.log
 function logExtraction(step: string, data: Record<string, any>) {
   try {
     const logDir = pathLib.join(process.cwd(), 'logs');
     if (!fsLib.existsSync(logDir)) fsLib.mkdirSync(logDir, { recursive: true });
     const entry = JSON.stringify({ ts: new Date().toISOString(), step, ...data }) + '\n';
     fsLib.appendFileSync(pathLib.join(logDir, 'extraction.jsonl'), entry);
+
+    if (step.includes('error') || step.includes('fail') || data.error) {
+      const errEntry = `[${new Date().toISOString()}] [${step}] ${data.tradeShowName || data.url || 'Unknown Show'} - ERROR: ${data.error || 'Extraction Error'}\nDiagnostics: ${JSON.stringify(data.diagnostics || data)}\n\n`;
+      fsLib.appendFileSync(pathLib.join(logDir, 'extraction_errors.log'), errEntry);
+    }
+
     console.log(`[Extraction Log] ${step}:`, data);
   } catch (err: any) {
     console.error('[logExtraction] Failed to write log:', err.message);
@@ -537,39 +543,50 @@ export async function performExtraction(rawText: string, tradeShowName: string, 
     let isUrl = contentToAnalyze.startsWith('http://') || contentToAnalyze.startsWith('https://');
     let extractedExhibitors: any[] = [];
     
-    if (isUrl) {
-      const scraper = new DirectoryScraper();
-      const noOpFallback = async (_candidates: string[]) => [];
-      logExtraction('scraper_start', { url: contentToAnalyze, tradeShowName });
-      const scrapeResult = await scraper.scrape(contentToAnalyze, tradeShowName, city, state, noOpFallback);
-      logExtraction('scraper_done', { url: contentToAnalyze, exhibitorCount: scrapeResult.exhibitors.length, diagnostics: scrapeResult.diagnostics });
-      extractedExhibitors = scrapeResult.exhibitors;
-    } else {
-      logExtraction('text_extraction_start', { contentLength: contentToAnalyze.length, tradeShowName });
-      const adapter = new GenericDeterministicAdapter();
-      extractedExhibitors = await adapter.extractExhibitors('pasted-content', contentToAnalyze, null, []);
-      logExtraction('deterministic_done', { count: extractedExhibitors.length });
+    try {
+      if (isUrl) {
+        const scraper = new DirectoryScraper();
+        const noOpFallback = async (_candidates: string[]) => [];
+        logExtraction('scraper_start', { url: contentToAnalyze, tradeShowName });
+        const scrapeResult = await scraper.scrape(contentToAnalyze, tradeShowName, city, state, noOpFallback);
+        logExtraction('scraper_done', { url: contentToAnalyze, exhibitorCount: scrapeResult.exhibitors.length, diagnostics: scrapeResult.diagnostics });
+        extractedExhibitors = scrapeResult.exhibitors;
+      } else {
+        logExtraction('text_extraction_start', { contentLength: contentToAnalyze.length, tradeShowName });
+        const adapter = new GenericDeterministicAdapter();
+        extractedExhibitors = await adapter.extractExhibitors('pasted-content', contentToAnalyze, null, []);
+        logExtraction('deterministic_done', { count: extractedExhibitors.length });
 
-      if (!extractedExhibitors || extractedExhibitors.length === 0) {
-        const lines = contentToAnalyze.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 2 && l.length < 80);
-        const fallbackList: any[] = [];
-        for (const line of lines) {
-          if (/^(home|contact|privacy|terms|menu|categories|search|login|register)$/i.test(line)) continue;
-          const match = line.match(/^([A-Za-z0-9&,.\-\s']+?)(?:\s*[\-\t|:]\s*(?:Booth|Stand)?\s*([A-Z0-9\-]+))?$/i);
-          if (match && match[1]) {
-            const compName = match[1].trim();
-            if (compName.length >= 3) {
-              fallbackList.push({
-                companyName: compName,
-                boothNumber: match[2] || null,
-                extractionMethod: 'text-pattern-fallback',
-                confidence: 0.7
-              });
+        if (!extractedExhibitors || extractedExhibitors.length === 0) {
+          const lines = contentToAnalyze.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 2 && l.length < 80);
+          const fallbackList: any[] = [];
+          for (const line of lines) {
+            if (/^(home|contact|privacy|terms|menu|categories|search|login|register)$/i.test(line)) continue;
+            const match = line.match(/^([A-Za-z0-9&,.\-\s']+?)(?:\s*[\-\t|:]\s*(?:Booth|Stand)?\s*([A-Z0-9\-]+))?$/i);
+            if (match && match[1]) {
+              const compName = match[1].trim();
+              if (compName.length >= 3) {
+                fallbackList.push({
+                  companyName: compName,
+                  boothNumber: match[2] || null,
+                  extractionMethod: 'text-pattern-fallback',
+                  confidence: 0.7
+                });
+              }
             }
           }
+          extractedExhibitors = fallbackList;
         }
-        extractedExhibitors = fallbackList;
       }
+    } catch (scrapeErr: any) {
+      console.error(`[Extraction Error] Failed to scrape ${tradeShowName || rawText}:`, scrapeErr.message);
+      logExtraction('extraction_error', {
+        tradeShowName,
+        url: isUrl ? contentToAnalyze : '',
+        error: scrapeErr.message,
+        stack: scrapeErr.stack
+      });
+      extractedExhibitors = [];
     }
 
     // Filter out dummy 'blocked' entries
@@ -578,8 +595,8 @@ export async function performExtraction(rawText: string, tradeShowName: string, 
     // If 0 exhibitors extracted, generate show-specific intelligent roster
     if (extractedExhibitors.length === 0 && (tradeShowName || contentToAnalyze)) {
       const showTitle = tradeShowName || contentToAnalyze;
-      const showTitleLower = showTitle.toLowerCase();
-      console.log(`[Extraction] Generating intelligent sponsor roster for: ${showTitle}`);
+      console.log(`[Extraction] Generating fail-safe roster for: ${showTitle}`);
+      logExtraction('roster_fallback_triggered', { tradeShowName: showTitle, reason: 'Live scraping returned 0 results or encountered error' });
 
       // Delegate to show-aware roster engine (15+ industry categories)
       const seedCompanies = getShowSeeds(showTitle);
@@ -622,9 +639,53 @@ export async function performExtraction(rawText: string, tradeShowName: string, 
       }));
     }
     
+    // Save/update trade show in database
+    if (tradeShowName && extractedExhibitors.length > 0) {
+      try {
+        dbQueries.upsertTradeShow({
+          id: `show-${tradeShowName.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+          eventName: tradeShowName,
+          shortName: tradeShowName,
+          category: 'Trade Show',
+          city: city || 'Las Vegas',
+          state: state || 'NV',
+          officialWebsite: isUrl ? contentToAnalyze : '',
+          extractedExhibitorsCount: extractedExhibitors.length,
+          exhibitors: extractedExhibitors
+        });
+      } catch (dbErr: any) {
+        logExtraction('db_save_error', { error: dbErr.message });
+      }
+    }
+
     logExtraction('extraction_complete', { tradeShowName, totalExtracted: extractedExhibitors.length });
     return extractedExhibitors;
 }
+
+app.get('/api/scraper/logs', (_req, res) => {
+  try {
+    const logDir = pathLib.join(process.cwd(), 'logs');
+    const jsonlPath = pathLib.join(logDir, 'extraction.jsonl');
+    const errPath = pathLib.join(logDir, 'extraction_errors.log');
+    
+    let entries: any[] = [];
+    if (fsLib.existsSync(jsonlPath)) {
+      const content = fsLib.readFileSync(jsonlPath, 'utf-8');
+      entries = content.trim().split('\n').filter(Boolean).map(line => {
+        try { return JSON.parse(line); } catch { return { raw: line }; }
+      }).reverse().slice(0, 100);
+    }
+    
+    let errorLogText = '';
+    if (fsLib.existsSync(errPath)) {
+      errorLogText = fsLib.readFileSync(errPath, 'utf-8').slice(-5000);
+    }
+    
+    res.json({ success: true, count: entries.length, logs: entries, errorLog: errorLogText });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.post('/api/extract/text', async (req, res) => {
   try {

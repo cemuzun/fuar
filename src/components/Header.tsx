@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-xl font-bold tracking-tight text-slate-800 font-sans">
-                ExhibitorNexus <span className="text-blue-600 font-normal text-sm">v2.7</span>
+                ExhibitorNexus <span className="text-blue-600 font-normal text-sm">v2.8</span>
               </h1>
               <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                 <Database className="w-3 h-3 mr-1 text-blue-600" />
