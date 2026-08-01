@@ -263,16 +263,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <Bug className={`w-4 h-4 ${activeView === 'scraper-debug' ? 'text-amber-400' : 'text-amber-600'}`} />
                 <span>Debug Logs</span>
               </button>
-            </div>
 
-            <button
-              onClick={onOpenSettings}
-              className="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-slate-800 text-white hover:bg-slate-700 shadow-xs cursor-pointer shrink-0"
-              title="Configure lead time cutoff, email settings, & metrics"
-            >
-              <Settings className="w-4 h-4 text-amber-400" />
-              <span>Settings</span>
-            </button>
+              <button
+                onClick={onOpenSettings}
+                className="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-slate-800 text-white hover:bg-slate-700 shadow-xs cursor-pointer shrink-0"
+                title="Configure lead time cutoff, email settings, & metrics"
+              >
+                <Settings className="w-4 h-4 text-amber-400" />
+                <span>Settings</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
