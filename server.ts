@@ -1,6 +1,7 @@
 import { DirectoryScraper } from './src/lib/scraper/index.js';
 import { GenericDeterministicAdapter } from './src/lib/scraper/adapters/generic-deterministic.js';
 import { ExhibitorData } from './src/lib/scraper/types.js';
+import { getShowSeeds } from './src/lib/show-roster-engine.js';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
@@ -535,72 +536,8 @@ export async function performExtraction(rawText: string, tradeShowName: string, 
       const showTitleLower = showTitle.toLowerCase();
       console.log(`[Extraction] Generating intelligent sponsor roster for: ${showTitle}`);
 
-      // Show-aware real sponsor / exhibitor lists
-      type SeedEntry = { name: string; booth: string; size: string; type: string; budget: string; ind: string; website: string };
-      let seedCompanies: SeedEntry[];
-
-      if (showTitleLower.includes('black hat') || showTitleLower.includes('blackhat')) {
-        seedCompanies = [
-          { name: 'Cisco', booth: 'T1', size: '40x60 Island', type: 'Island', budget: '$250,000', ind: 'Network Security', website: 'https://www.cisco.com' },
-          { name: 'SentinelOne', booth: 'T2', size: '30x40 Island', type: 'Island', budget: '$150,000', ind: 'Endpoint Security', website: 'https://www.sentinelone.com' },
-          { name: 'Palo Alto Networks', booth: 'T3', size: '40x40 Island', type: 'Island', budget: '$200,000', ind: 'Cybersecurity Platform', website: 'https://www.paloaltonetworks.com' },
-          { name: 'CrowdStrike', booth: 'D1', size: '30x30 Island', type: 'Island', budget: '$120,000', ind: 'Threat Intelligence', website: 'https://www.crowdstrike.com' },
-          { name: 'Qualys', booth: 'T4', size: '20x30 Island', type: 'Island', budget: '$90,000', ind: 'Cloud Security', website: 'https://www.qualys.com' },
-          { name: 'ReliaQuest', booth: 'T5', size: '20x20 Island', type: 'Island', budget: '$75,000', ind: 'Security Operations', website: 'https://www.reliaquest.com' },
-          { name: 'ServiceNow', booth: 'T6', size: '20x30 Island', type: 'Island', budget: '$95,000', ind: 'IT & Security Automation', website: 'https://www.servicenow.com' },
-          { name: 'ThreatLocker', booth: 'AP1', size: '30x40 Island', type: 'Island', budget: '$130,000', ind: 'Zero Trust Security', website: 'https://www.threatlocker.com' },
-          { name: 'KnowBe4', booth: 'D2', size: '20x20 Island', type: 'Island', budget: '$70,000', ind: 'Security Awareness Training', website: 'https://www.knowbe4.com' },
-          { name: 'Tenable', booth: 'D3', size: '20x30 Island', type: 'Island', budget: '$85,000', ind: 'Vulnerability Management', website: 'https://www.tenable.com' },
-          { name: 'Sophos', booth: 'D4', size: '20x20 Island', type: 'Island', budget: '$65,000', ind: 'Managed Security', website: 'https://www.sophos.com' },
-          { name: 'Vectra AI', booth: 'D5', size: '10x20 Inline', type: 'Inline', budget: '$35,000', ind: 'AI-Powered Security', website: 'https://www.vectra.ai' },
-          { name: 'Google Cloud Security', booth: 'S1', size: '20x20 Island', type: 'Island', budget: '$80,000', ind: 'Cloud Security', website: 'https://cloud.google.com/security' },
-          { name: 'Wiz', booth: 'S2', size: '20x20 Island', type: 'Island', budget: '$75,000', ind: 'Cloud Security Posture', website: 'https://www.wiz.io' },
-          { name: 'Cyera', booth: 'S3', size: '10x20 Inline', type: 'Inline', budget: '$40,000', ind: 'Data Security', website: 'https://www.cyera.io' },
-          { name: 'ManageEngine (Zoho Corp)', booth: 'S4', size: '10x20 Inline', type: 'Inline', budget: '$38,000', ind: 'IT Management', website: 'https://www.manageengine.com' },
-          { name: 'Varonis', booth: 'S5', size: '10x20 Inline', type: 'Inline', budget: '$42,000', ind: 'Data Security & Analytics', website: 'https://www.varonis.com' },
-          { name: 'Fortra', booth: 'D6', size: '10x20 Inline', type: 'Inline', budget: '$32,000', ind: 'Cybersecurity Solutions', website: 'https://www.fortra.com' },
-          { name: 'Cymulate', booth: 'D7', size: '10x10 Inline', type: 'Inline', budget: '$20,000', ind: 'Attack Simulation', website: 'https://www.cymulate.com' },
-          { name: 'Exaforce', booth: 'D8', size: '10x10 Inline', type: 'Inline', budget: '$18,000', ind: 'Security Analytics', website: 'https://www.exaforce.com' },
-          { name: 'Abnormal Security', booth: 'P1', size: '10x20 Inline', type: 'Inline', budget: '$30,000', ind: 'Email Security', website: 'https://www.abnormalsecurity.com' },
-          { name: 'Darktrace', booth: 'P2', size: '10x20 Inline', type: 'Inline', budget: '$35,000', ind: 'AI Cybersecurity', website: 'https://www.darktrace.com' },
-          { name: 'Arctic Wolf', booth: 'P3', size: '10x20 Inline', type: 'Inline', budget: '$28,000', ind: 'Security Operations', website: 'https://www.arcticwolf.com' },
-          { name: 'Zscaler', booth: 'P4', size: '20x20 Island', type: 'Island', budget: '$60,000', ind: 'Zero Trust Networking', website: 'https://www.zscaler.com' },
-          { name: 'Okta', booth: 'P5', size: '20x20 Island', type: 'Island', budget: '$65,000', ind: 'Identity Security', website: 'https://www.okta.com' },
-        ];
-      } else if (showTitleLower.includes('pack expo') || showTitleLower.includes('packaging')) {
-        seedCompanies = [
-          { name: 'Sealed Air', booth: '1042', size: '20x20 Island', type: 'Island', budget: '$55,000', ind: 'Packaging Materials', website: 'https://www.sealedair.com' },
-          { name: 'Tetra Pak', booth: '1210', size: '30x30 Island', type: 'Island', budget: '$90,000', ind: 'Food Packaging', website: 'https://www.tetrapak.com' },
-          { name: 'Graphic Packaging', booth: '815', size: '20x20 Island', type: 'Island', budget: '$60,000', ind: 'Paper Packaging', website: 'https://www.graphicpkg.com' },
-          { name: 'ProMach', booth: '1540', size: '30x40 Island', type: 'Island', budget: '$110,000', ind: 'Packaging Machinery', website: 'https://www.promachbuilt.com' },
-          { name: 'Multivac', booth: '2104', size: '20x30 Island', type: 'Island', budget: '$75,000', ind: 'Food Packaging Solutions', website: 'https://www.multivac.com' },
-          { name: 'Rockwell Automation', booth: '620', size: '20x20 Island', type: 'Island', budget: '$70,000', ind: 'Industrial Automation', website: 'https://www.rockwellautomation.com' },
-          { name: 'Coesia', booth: '1402', size: '20x20 Island', type: 'Island', budget: '$55,000', ind: 'Packaging Solutions', website: 'https://www.coesia.com' },
-          { name: 'Barry-Wehmiller', booth: '930', size: '20x20 Island', type: 'Island', budget: '$50,000', ind: 'Packaging Equipment', website: 'https://www.barrywehmiller.com' },
-        ];
-      } else if (showTitleLower.includes('sema') || showTitleLower.includes('automotive')) {
-        seedCompanies = [
-          { name: 'BorgWarner', booth: '1042', size: '30x30 Island', type: 'Island', budget: '$95,000', ind: 'Auto Components', website: 'https://www.borgwarner.com' },
-          { name: 'MagnaFlow', booth: '1210', size: '20x20 Island', type: 'Island', budget: '$55,000', ind: 'Exhaust Systems', website: 'https://www.magnaflow.com' },
-          { name: 'K&N Engineering', booth: '815', size: '20x20 Island', type: 'Island', budget: '$50,000', ind: 'Air Filtration', website: 'https://www.knfilters.com' },
-          { name: 'Holley Performance', booth: '1540', size: '20x30 Island', type: 'Island', budget: '$70,000', ind: 'Performance Parts', website: 'https://www.holley.com' },
-          { name: 'Dorman Products', booth: '2104', size: '20x20 Island', type: 'Island', budget: '$45,000', ind: 'Auto Parts', website: 'https://www.dormanhd.com' },
-          { name: 'Bilstein', booth: '620', size: '10x20 Inline', type: 'Inline', budget: '$28,000', ind: 'Suspension Systems', website: 'https://www.bilstein.com' },
-          { name: 'Monroe', booth: '1402', size: '10x20 Inline', type: 'Inline', budget: '$25,000', ind: 'Shock Absorbers', website: 'https://www.monroe.com' },
-          { name: 'Flowmaster', booth: '930', size: '10x20 Inline', type: 'Inline', budget: '$22,000', ind: 'Exhaust Performance', website: 'https://www.flowmastermufflers.com' },
-        ];
-      } else {
-        seedCompanies = [
-          { name: 'Apex Modular Solutions', booth: '1042', size: '20x20 Island', type: 'Island', budget: '$45,000', ind: 'Event Technology', website: 'https://www.apexmodularsolutions.com' },
-          { name: 'Vanguard Display Technologies', booth: '1210', size: '30x30 Island', type: 'Island', budget: '$85,000', ind: 'Digital Signage & LED', website: 'https://www.vanguarddisplaytechnologies.com' },
-          { name: 'Matrix Exhibit Systems', booth: '815', size: '10x20 Inline', type: 'Inline', budget: '$18,000', ind: 'Modular Hardware', website: 'https://www.matrixexhibitsystems.com' },
-          { name: 'Symphony Brand Experience', booth: '1540', size: '20x30 Island', type: 'Island', budget: '$65,000', ind: 'Brand Activation', website: 'https://www.symphonybrandexperience.com' },
-          { name: 'OmniPack Global', booth: '2104', size: '20x20 Island', type: 'Island', budget: '$50,000', ind: 'Packaging & Automation', website: 'https://www.omnipackglobal.com' },
-          { name: 'Titanium Fabrications USA', booth: '620', size: '10x10 Inline', type: 'Inline', budget: '$12,000', ind: 'Custom Metalwork', website: 'https://www.titaniumfabricationsusa.com' },
-          { name: 'Horizon Lightbox Systems', booth: '1402', size: '20x20 Island', type: 'Island', budget: '$40,000', ind: 'LED Lightboxes', website: 'https://www.horizonlightboxsystems.com' },
-          { name: 'EcoExhibits Direct', booth: '930', size: '10x20 Peninsula', type: 'Peninsula', budget: '$22,000', ind: 'Sustainable Graphics', website: 'https://www.ecoexhibitsdirect.com' },
-        ];
-      }
+      // Delegate to show-aware roster engine (15+ industry categories)
+      const seedCompanies = getShowSeeds(showTitle);
 
       extractedExhibitors = seedCompanies.map((c, i) => ({
         id: `ex-gen-${Date.now()}-${i}`,
