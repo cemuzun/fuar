@@ -9,6 +9,8 @@ const EXCLUSION_PATTERNS = [
   /^logo$/i, /^banner$/i, /^image$/i, /^photo$/i, /^icon$/i, /^arrow$/i,
   /^menu$/i, /^navigation$/i, /^header$/i, /^footer$/i, /^close$/i, /^open$/i,
   /^next$/i, /^previous$/i, /^submit$/i, /^cancel$/i, /^ok$/i, /^yes$/i, /^no$/i,
+  /video/i, /pause/i, /play/i, /read more/i, /pack expo/i, /expo pack/i, /trade show/i,
+  /learn more/i, /see more/i, /view details/i, /click here/i, /cookie/i, /subscribe/i, /placeholder/i,
 ];
 
 function isGeneric(text: string): boolean {

@@ -613,7 +613,21 @@ var EXCLUSION_PATTERNS = [
   /^cancel$/i,
   /^ok$/i,
   /^yes$/i,
-  /^no$/i
+  /^no$/i,
+  /video/i,
+  /pause/i,
+  /play/i,
+  /read more/i,
+  /pack expo/i,
+  /expo pack/i,
+  /trade show/i,
+  /learn more/i,
+  /see more/i,
+  /view details/i,
+  /click here/i,
+  /cookie/i,
+  /subscribe/i,
+  /placeholder/i
 ];
 function isGeneric(text) {
   const trimmed = text.trim();
