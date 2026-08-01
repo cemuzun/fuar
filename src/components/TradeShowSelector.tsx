@@ -264,10 +264,9 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
           {/* Individual Trade Show Cards */}
           {displayedGridShows.map((show) => {
             const isSelected = selectedShowId === show.id;
-            const hasExtractedExhibitors = show.exhibitors && show.exhibitors.length > 0;
-            const exhibitorCount = hasExtractedExhibitors
+            const exhibitorCount = show.exhibitors && show.exhibitors.length > 0
               ? show.exhibitors.length
-              : (show.extractedExhibitorsCount || show.estimatedExhibitorsCount || 0);
+              : (show.extractedExhibitorsCount || 0);
             const leadsCount = show.exhibitors
               ? show.exhibitors.reduce(
                   (sum, ex) => sum + (ex.decisionMakers ? ex.decisionMakers.length : 0),
@@ -336,7 +335,7 @@ export const TradeShowSelector: React.FC<TradeShowSelectorProps> = ({
                   <div className="flex justify-between items-center text-[11px]">
                     <span className="text-slate-500">Exhibitors:</span>
                     <span className={`font-bold ${exhibitorCount > 0 ? 'text-slate-800' : 'text-slate-400'}`}>
-                      {exhibitorCount.toLocaleString()} {!hasExtractedExhibitors && exhibitorCount > 0 ? <span className="text-[10px] text-slate-400 font-normal font-sans">(Est.)</span> : null}
+                      {exhibitorCount.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[11px]">
