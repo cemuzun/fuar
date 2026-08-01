@@ -411,7 +411,7 @@ export default function App() {
   const [extractionProgress, setExtractionProgress] = useState<number>(0);
   const [extractionStepText, setExtractionStepText] = useState<string>('');
 
-  const handleExtractCompaniesForShow = async (showId: string | null, extractAll: boolean = false) => {
+  const handleExtractCompaniesForShow = async (showId: string | null = null, extractAll: boolean = false) => {
     setIsExtractingCompanies(true);
     setExtractionProgress(5);
 
@@ -429,7 +429,8 @@ export default function App() {
     queueActiveRef.current = true;
     queuePausedRef.current = false;
 
-    const singleTarget = (!extractAll && showId) ? shows.find((s) => s.id === showId) : ((!extractAll && selectedShowId) ? shows.find((s) => s.id === selectedShowId) : null);
+    const targetShowId = showId || selectedShowId;
+    const singleTarget = (!extractAll && targetShowId) ? shows.find((s) => s.id === targetShowId) : null;
     const dedupeTarget = (list: TradeShowEvent[]) => {
       const seen = new Set();
       return list.filter(s => {
@@ -439,11 +440,23 @@ export default function App() {
         return true;
       });
     };
-    const targetShowList = extractAll ? dedupeTarget(shows) : (singleTarget ? [singleTarget] : dedupeTarget(shows));
+    const targetShowList = extractAll
+      ? dedupeTarget(shows)
+      : (singleTarget ? [singleTarget] : (shows.length > 0 ? [shows[0]] : []));
+
+    if (targetShowList.length === 0) {
+      setIsExtractingCompanies(false);
+      setIsFetchProgressOpen(false);
+      setNotificationToast({
+        message: 'No valid trade show selected for extraction.',
+        type: 'info',
+      });
+      return;
+    }
 
     const showTitle = extractAll
-      ? `ALL ${shows.length.toLocaleString()} USA Trade Shows`
-      : (singleTarget ? singleTarget.eventName : 'Selected USA Trade Show');
+      ? `ALL ${targetShowList.length.toLocaleString()} USA Trade Shows`
+      : (singleTarget ? singleTarget.eventName : targetShowList[0].eventName);
 
     const startMsg = `Initializing live multi-stage queue for ${showTitle}...`;
     setExtractionStepText(startMsg);
@@ -451,7 +464,7 @@ export default function App() {
     setFetchCurrentShowTitle(showTitle);
 
     setNotificationToast({
-      message: `Starting live multi-stage extraction queue for ${showTitle}...`,
+      message: `Starting live extraction for ${showTitle}...`,
       type: 'info',
     });
 
@@ -460,17 +473,32 @@ export default function App() {
     let accumulatedLeadsCount = 0;
     const logFeed: LogEntry[] = [];
 
-    let index = 0;
-    const totalQueueLength = targetShowList.length;
+    // Lightweight payload stripping huge nested objects to prevent HTTP 413
+    const lightShowPayload = targetShowList.map(s => ({
+      id: s.id,
+      eventName: s.eventName,
+      city: s.city,
+      state: s.state,
+      dates: s.dates,
+      year: s.year,
+      category: s.category,
+      officialWebsite: s.officialWebsite
+    }));
 
     try {
       const response = await fetch('/api/jobs/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shows: targetShowList })
+        body: JSON.stringify({ shows: lightShowPayload })
       });
+      
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errText.slice(0, 100)}`);
+      }
+      
       const data = await response.json();
-      if (!data.success) throw new Error('Failed to start extraction job');
+      if (!data.success) throw new Error(data.error || 'Failed to start extraction job');
       const jobId = data.jobId;
 
       while (queueActiveRef.current) {
@@ -480,30 +508,33 @@ export default function App() {
         }
 
         const statusRes = await fetch(`/api/jobs/status/${jobId}`);
-        const statusData = await statusRes.json();
+        if (!statusRes.ok) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          continue;
+        }
         
+        const statusData = await statusRes.json();
         if (!statusData.success || !statusData.job) {
-          throw new Error('Failed to fetch job status');
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          continue;
         }
 
         const job = statusData.job;
-        
-        // Update UI based on job.progress and job.results
-        const total = job.total;
-        const current = job.progress;
+        const total = job.total || 1;
+        const current = job.progress || 0;
         
         setFetchCurrentShow(current + 1);
         setFetchProgressPercent(Math.round((current / Math.max(1, total)) * 100));
         setFetchStepMessage(`Processing show ${current} of ${total}...`);
         
         if (job.status === 'completed' || job.status === 'failed' || job.status === 'stalled') {
-          // Process final results
           let newTotalExhibitors = 0;
           let newTotalLeads = 0;
           
           const updatesByShowId = new Map<string, any[]>();
+          const results = job.results || [];
           
-          job.results.forEach((resItem: any) => {
+          results.forEach((resItem: any) => {
              const targetShow = targetShowList.find(s => s.id === resItem.showId);
              if (!targetShow) return;
              
@@ -548,12 +579,12 @@ export default function App() {
                    emailConfidence: dm.emailConfidence || 'Pattern Generated',
                    phone: dm.phone || ''
                  })),
-                 outreachStatus: ex.decisionMakers && ex.decisionMakers.length > 0 ? 'Decision Maker Found' : 'New Lead',
+                 outreachStatus: (ex.decisionMakers && ex.decisionMakers.length > 0) ? 'Decision Maker Found' : 'New Lead',
                  leadScore: 85
              }));
              
              const exLength = additionalExhibitors.length;
-             const leLength = additionalExhibitors.reduce((acc: number, ex: any) => acc + (ex.decisionMakers ? ex.decisionMakers.length : 0), 0);
+             const leLength = additionalExhibitors.reduce((acc: number, exItem: any) => acc + (exItem.decisionMakers ? exItem.decisionMakers.length : 0), 0);
              newTotalExhibitors += exLength;
              newTotalLeads += leLength;
              
@@ -572,7 +603,6 @@ export default function App() {
              }
           });
           
-          // Batch state update for all shows to prevent freeze
           if (updatesByShowId.size > 0) {
             setShows((prevShows) =>
               prevShows.map((show) => {
@@ -584,31 +614,36 @@ export default function App() {
               })
             );
             if (singleTarget) {
-                setSelectedShowId(singleTarget.id);
+              setSelectedShowId(singleTarget.id);
             }
           }
           
           setFetchLog([...logFeed]);
-          setFetchResultShowsCount(job.results.length);
+          setFetchResultShowsCount(results.length);
           setFetchResultExhibitorsCount(newTotalExhibitors);
           setFetchResultLeadsCount(newTotalLeads);
           
           accumulatedExhibitorsCount += newTotalExhibitors;
           accumulatedLeadsCount += newTotalLeads;
-          processedShowsCount += job.results.length;
+          processedShowsCount += results.length;
           
           if (job.status === 'failed' || job.status === 'stalled') {
              setFetchStepMessage(`Job finished with status: ${job.status}`);
           } else {
-             setFetchStepMessage(`Successfully processed ${job.results.length} shows!`);
+             setFetchStepMessage(`Successfully processed ${results.length} shows!`);
           }
-          break; // exit loop
+          break;
         }
         
-        await new Promise(r => setTimeout(r, 3000)); // Poll every 3 seconds
+        await new Promise(r => setTimeout(r, 2000));
       }
     } catch (err: any) {
-      console.log('Queue execution error:', err.message);
+      console.error('Queue execution error:', err);
+      setNotificationToast({
+        message: `Extraction Error: ${err.message || 'Server connection issue'}`,
+        type: 'info',
+      });
+      setFetchStepMessage(`Extraction stopped: ${err.message || 'Error occurred'}`);
     } finally {
       queueActiveRef.current = false;
       setFetchIsComplete(true);
@@ -617,7 +652,7 @@ export default function App() {
 
       if (extractAll) {
         setNotificationToast({
-          message: `Multi-Stage Queue Completed! Extracted ${accumulatedExhibitorsCount.toLocaleString()} exhibitor profiles & ${accumulatedLeadsCount.toLocaleString()} decision maker leads across ${processedShowsCount.toLocaleString()} USA trade shows.`,
+          message: `Multi-Stage Queue Completed! Extracted ${accumulatedExhibitorsCount.toLocaleString()} exhibitor profiles & ${accumulatedLeadsCount.toLocaleString()} decision maker leads across ${processedShowsCount.toLocaleString()} trade shows.`,
           type: 'success',
         });
         setActiveView('shows');

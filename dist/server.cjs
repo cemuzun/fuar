@@ -790,7 +790,8 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 var app = (0, import_express.default)();
 var PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3e3;
-app.use(import_express.default.json({ limit: "10mb" }));
+app.use(import_express.default.json({ limit: "50mb" }));
+app.use(import_express.default.urlencoded({ limit: "50mb", extended: true }));
 app.get("/api/db/shows", (_req, res) => {
   try {
     const shows = dbQueries.getAllTradeShows();
