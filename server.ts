@@ -417,13 +417,58 @@ app.post('/api/extract/directory', async (req, res) => {
         const months: Record<string, string> = { JAN:'January',FEB:'February',MAR:'March',APR:'April',MAY:'May',JUN:'June',JUL:'July',AUG:'August',SEP:'September',OCT:'October',NOV:'November',DEC:'December' };
         const month = months[monthPart.toUpperCase()] || monthPart;
         if (eventName) {
-          events.push({ id: `show-orbus-${events.length}`, eventName, shortName: eventName, category: 'Trade Show', city, state, country: 'USA', venue: '', dates, month, year, officialWebsite, estimatedExhibitorsCount: exhibitors, attendees, exhibitors: [] });
+          if (officialWebsite.includes('blackhat.com') && !officialWebsite.includes('event-sponsors.html')) {
+            officialWebsite = officialWebsite.replace(/\/$/, '') + '/event-sponsors.html';
+          }
+          // Merge with saved DB state if present
+          const dbShow = Object.values(dbQueries.getAllShows() || {}).find(
+            (s: any) => s.eventName === eventName || s.shortName === eventName || (s.officialWebsite && s.officialWebsite.includes('blackhat.com'))
+          );
+          const storedExhibitors = dbShow ? dbQueries.getExhibitorsForShow(dbShow.id) : [];
+          events.push({
+            id: dbShow?.id || `show-orbus-${events.length}`,
+            eventName,
+            shortName: eventName,
+            category: 'Trade Show',
+            city,
+            state,
+            country: 'USA',
+            venue: '',
+            dates,
+            month,
+            year,
+            officialWebsite,
+            estimatedExhibitorsCount: dbShow?.estimatedExhibitorsCount || exhibitors,
+            extractedExhibitorsCount: storedExhibitors.length,
+            attendees,
+            exhibitors: storedExhibitors
+          });
         }
       });
 
       console.log(`[Directory] USA: extracted ${events.length} events from Orbus`);
+      if (events.length === 0) {
+        const savedShows = Object.values(dbQueries.getAllShows() || {});
+        console.log(`[Directory] Orbus returned 0, loading ${savedShows.length} saved shows from DB`);
+        for (const s of savedShows as any[]) {
+          const storedExhibitors = dbQueries.getExhibitorsForShow(s.id);
+          events.push({
+            ...s,
+            extractedExhibitorsCount: storedExhibitors.length,
+            exhibitors: storedExhibitors
+          });
+        }
+      }
       return res.json({ success: true, country: 'usa', countryName: 'United States', flag: '🇺🇸', totalCount: events.length, events });
     } catch (err: any) {
+      const savedShows = Object.values(dbQueries.getAllShows() || {});
+      if (savedShows.length > 0) {
+        const events = savedShows.map((s: any) => {
+          const storedExhibitors = dbQueries.getExhibitorsForShow(s.id);
+          return { ...s, extractedExhibitorsCount: storedExhibitors.length, exhibitors: storedExhibitors };
+        });
+        return res.json({ success: true, country: 'usa', countryName: 'United States', flag: '🇺🇸', totalCount: events.length, events });
+      }
       return res.status(500).json({ error: err.message });
     }
   }
