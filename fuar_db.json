@@ -1,0 +1,445 @@
+{
+  "trade_shows": {
+    "ts-orbus-1": {
+      "id": "ts-orbus-1",
+      "eventName": "Pack Expo International 2026",
+      "shortName": "Pack Expo",
+      "category": "Packaging & Processing",
+      "city": "Chicago",
+      "state": "IL",
+      "country": "USA",
+      "venue": "McCormick Place",
+      "dates": "Nov 3 - Nov 6, 2026",
+      "month": "November",
+      "year": 2026,
+      "orbusUrl": "https://www.orbus.com/about-us/usa-tradeshow-list",
+      "officialWebsite": "https://www.packexpointernational.com",
+      "estimatedExhibitorsCount": 2500,
+      "extractedExhibitorsCount": 0,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T13:23:38.262Z"
+    },
+    "ts-orbus-2": {
+      "id": "ts-orbus-2",
+      "eventName": "SEMA Show 2026",
+      "shortName": "SEMA",
+      "category": "Automotive Aftermarket",
+      "city": "Las Vegas",
+      "state": "NV",
+      "country": "USA",
+      "venue": "Las Vegas Convention Center",
+      "dates": "Nov 4 - Nov 7, 2026",
+      "month": "November",
+      "year": 2026,
+      "orbusUrl": "https://www.orbus.com/about-us/usa-tradeshow-list",
+      "officialWebsite": "https://www.semashow.com",
+      "estimatedExhibitorsCount": 2400,
+      "extractedExhibitorsCount": 0,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T13:23:38.263Z"
+    },
+    "ts-orbus-3": {
+      "id": "ts-orbus-3",
+      "eventName": "MAGIC Las Vegas (Fall 2026)",
+      "shortName": "MAGIC Vegas",
+      "category": "Fashion & Apparel",
+      "city": "Las Vegas",
+      "state": "NV",
+      "country": "USA",
+      "venue": "Las Vegas Convention Center",
+      "dates": "Aug 18 - Aug 20, 2026",
+      "month": "August",
+      "year": 2026,
+      "orbusUrl": "https://www.orbus.com/about-us/usa-tradeshow-list",
+      "officialWebsite": "https://www.magicfashionevents.com",
+      "estimatedExhibitorsCount": 1800,
+      "extractedExhibitorsCount": 0,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T13:23:38.265Z"
+    },
+    "ts-orbus-4": {
+      "id": "ts-orbus-4",
+      "eventName": "InfoComm USA 2026",
+      "shortName": "InfoComm",
+      "category": "Audiovisual & Pro AV",
+      "city": "Orlando",
+      "state": "FL",
+      "country": "USA",
+      "venue": "Orange County Convention Center",
+      "dates": "Oct 14 - Oct 18, 2026",
+      "month": "October",
+      "year": 2026,
+      "orbusUrl": "https://www.orbus.com/about-us/usa-tradeshow-list",
+      "officialWebsite": "https://www.infocommshow.org",
+      "estimatedExhibitorsCount": 1000,
+      "extractedExhibitorsCount": 0,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T13:23:38.265Z"
+    },
+    "ts-orbus-5": {
+      "id": "ts-orbus-5",
+      "eventName": "Global Pet Expo 2026",
+      "shortName": "Global Pet Expo",
+      "category": "Pet Products & Retail",
+      "city": "Orlando",
+      "state": "FL",
+      "country": "USA",
+      "venue": "Orange County Convention Center",
+      "dates": "Sep 22 - Sep 24, 2026",
+      "month": "September",
+      "year": 2026,
+      "orbusUrl": "https://www.orbus.com/about-us/usa-tradeshow-list",
+      "officialWebsite": "https://www.globalpetexpo.org",
+      "estimatedExhibitorsCount": 1100,
+      "extractedExhibitorsCount": 0,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T13:23:38.266Z"
+    }
+  },
+  "exhibitors": {},
+  "decision_makers": {},
+  "scraper_checkpoints": {
+    "https://www.packexpointernational.com": {
+      "url": "https://www.packexpointernational.com",
+      "data": {
+        "status": "completed",
+        "exhibitors": []
+      },
+      "updated_at": "2026-08-01T01:23:07.720Z"
+    },
+    "https://www.semashow.com": {
+      "url": "https://www.semashow.com",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "EXHIBIT",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.semashow.com",
+            "sourceEvidence": "Link Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Buy a Booth",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.semashow.com",
+            "sourceEvidence": "Link Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T01:23:10.036Z"
+    },
+    "https://www.magicfashionevents.com": {
+      "url": "https://www.magicfashionevents.com",
+      "data": {
+        "status": "completed",
+        "exhibitors": []
+      },
+      "updated_at": "2026-08-01T01:23:12.293Z"
+    },
+    "https://www.infocommshow.org": {
+      "url": "https://www.infocommshow.org",
+      "data": {
+        "status": "completed",
+        "exhibitors": []
+      },
+      "updated_at": "2026-08-01T01:23:15.015Z"
+    },
+    "https://www.globalpetexpo.org": {
+      "url": "https://www.globalpetexpo.org",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "APPA",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Global Pet Expo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "The Pet Summit",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Pets Add Life",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Manufacturers",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Retailers",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Media & Influencers",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Suppliers",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Distributors",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "VC & Finance",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Marketers",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Exhibit at Global",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Categories",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Tech Innovation",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Start",
+            "boothNumber": "Ups",
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.95
+          },
+          {
+            "companyName": "Aquatics & Exotics",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Modern Pet",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Natural & Sustainable",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "International & Sourcing",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Sponsor Opportunities Upgrade Listing",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Opportunities",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Upgrade Listing",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Education",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Hotel & Travel Info",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Media",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "FAQs",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Show Rules",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Contact Us",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T01:23:17.669Z"
+    }
+  }
+}

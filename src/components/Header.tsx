@@ -159,11 +159,11 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center flex-wrap gap-2 sm:gap-2.5 shrink-0">
+        <div className="flex items-center overflow-x-auto scrollbar-none gap-2 py-0.5 shrink-0 max-w-full">
           <button
             onClick={onRefreshOrbus}
             disabled={isSyncing}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition disabled:opacity-50 shadow-xs shrink-0"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition disabled:opacity-50 shadow-xs shrink-0 whitespace-nowrap"
             title="Sync Orbus USA Trade Show List directly"
           >
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isSyncing ? 'animate-spin text-blue-600' : 'text-slate-400'}`} />
@@ -172,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenExtractor}
-            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition shrink-0"
+            className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
             title="3-Step Lead Extraction Wizard (Find Trade Show ➔ Extract Companies ➔ Discover Decision Maker Leads)"
           >
             <Sparkles className="w-4 h-4 mr-1.5 text-amber-300" />
@@ -181,7 +181,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenAnalytics}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-xs shrink-0"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition shadow-xs shrink-0 whitespace-nowrap"
           >
             <BarChart2 className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
             Analytics
@@ -189,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenExport}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition shrink-0"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
           >
             <Download className="w-3.5 h-3.5 mr-1.5" />
             Export
@@ -197,7 +197,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenSettings}
-            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white shadow-xs transition shrink-0"
+            className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white shadow-xs transition shrink-0 whitespace-nowrap"
             title="Configure lead time cutoff, email settings, & metrics"
           >
             <Settings className="w-3.5 h-3.5 mr-1.5 text-amber-400" />
@@ -211,7 +211,7 @@ export const Header: React.FC<HeaderProps> = ({
       {onViewChange && (
         <div className="bg-slate-100/80 border-t border-slate-200 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 py-1.5 overflow-x-auto scrollbar-none">
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
               <button
                 onClick={() => onViewChange('shows')}
                 className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-2 shrink-0 whitespace-nowrap ${
@@ -272,13 +272,15 @@ export const Header: React.FC<HeaderProps> = ({
                 <Bug className={`w-4 h-4 shrink-0 ${activeView === 'scraper-debug' ? 'text-amber-400' : 'text-amber-600'}`} />
                 <span>Debug Logs</span>
               </button>
+            </div>
 
+            <div className="flex items-center shrink-0">
               <button
                 onClick={onOpenSettings}
-                className="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-slate-800 text-white hover:bg-slate-700 shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
+                className="px-3.5 py-1.5 rounded-md text-xs font-bold transition flex items-center space-x-1.5 bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-200/60 border border-slate-200 shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
                 title="Configure lead time cutoff, email settings, & metrics"
               >
-                <Settings className="w-4 h-4 text-amber-400 shrink-0" />
+                <Settings className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 <span>Settings</span>
               </button>
             </div>
