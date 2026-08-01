@@ -81,13 +81,19 @@ const SearchableShowSelector: React.FC<SearchableShowSelectorProps> = ({
   const filteredShows = shows.filter((s) => {
     if (!searchTerm.trim()) return true;
     const q = searchTerm.toLowerCase();
+    const eventName = (s.eventName || '').toLowerCase();
+    const shortName = (s.shortName || '').toLowerCase();
+    const city = (s.city || '').toLowerCase();
+    const state = (s.state || '').toLowerCase();
+    const category = (s.category || '').toLowerCase();
+    const venue = (s.venue || '').toLowerCase();
     return (
-      s.eventName.toLowerCase().includes(q) ||
-      s.shortName.toLowerCase().includes(q) ||
-      s.city.toLowerCase().includes(q) ||
-      s.state.toLowerCase().includes(q) ||
-      s.category.toLowerCase().includes(q) ||
-      (s.venue && s.venue.toLowerCase().includes(q))
+      eventName.includes(q) ||
+      shortName.includes(q) ||
+      city.includes(q) ||
+      state.includes(q) ||
+      category.includes(q) ||
+      venue.includes(q)
     );
   });
 
@@ -712,17 +718,20 @@ export const ExhibitorList: React.FC<ExhibitorListProps> = ({
                             <button
                               type="button"
                               onClick={() => {
-                                const showObj = shows.find(
-                                  (s) => s.eventName === ex.tradeShowName || s.shortName === ex.tradeShowName
-                                );
-                                if (showObj && onSelectShow) {
-                                  onSelectShow(showObj.id);
-                                } else if (onSelectShow) {
-                                  const matched = shows.find((s) =>
-                                    ex.tradeShowName.toLowerCase().includes(s.shortName.toLowerCase())
-                                  );
-                                  if (matched) onSelectShow(matched.id);
-                                }
+                                 const showObj = shows.find(
+                                   (s) => s.eventName === ex.tradeShowName || (s.shortName && s.shortName === ex.tradeShowName)
+                                 );
+                                 if (showObj && onSelectShow) {
+                                   onSelectShow(showObj.id);
+                                 } else if (onSelectShow) {
+                                   const targetName = (ex.tradeShowName || '').toLowerCase();
+                                   const matched = shows.find((s) => {
+                                     const sShort = (s.shortName || '').toLowerCase();
+                                     const sEvent = (s.eventName || '').toLowerCase();
+                                     return (sShort && targetName.includes(sShort)) || (sEvent && targetName.includes(sEvent));
+                                   });
+                                   if (matched) onSelectShow(matched.id);
+                                 }
                               }}
                               className="font-bold text-slate-900 hover:text-blue-600 hover:underline block text-left transition cursor-pointer"
                               title={`Click to filter and view all companies & leads for ${ex.tradeShowName}`}
