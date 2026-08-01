@@ -367,6 +367,20 @@ var BlackhatAdapter = class {
         });
       }
     };
+    let targetUrl = url;
+    if (targetUrl.includes("blackhat.com") && !targetUrl.includes("event-sponsors.html")) {
+      targetUrl = targetUrl.replace(/\/$/, "") + "/event-sponsors.html";
+      console.log(`[BlackhatAdapter] Target URL normalized to: ${targetUrl}`);
+    }
+    if (page && page.url() !== targetUrl) {
+      try {
+        await page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 25e3 });
+        await page.waitForTimeout(3e3);
+        html = await page.content();
+      } catch (e) {
+        console.warn(`[BlackhatAdapter] Navigation to ${targetUrl} warning: ${e.message}`);
+      }
+    }
     let workingHtml = html;
     if (!html || html.includes("cf-wrapper") || html.includes("Cloudflare") || html.length < 5e3) {
       console.log("[BlackhatAdapter] Cloudflare block detected, attempting bypass fetch...");
@@ -384,7 +398,7 @@ var BlackhatAdapter = class {
           "Sec-Fetch-Site": "cross-site",
           "Upgrade-Insecure-Requests": "1"
         };
-        const res = await fetch(url, { headers: bypassHeaders });
+        const res = await fetch(targetUrl, { headers: bypassHeaders });
         if (res.ok) {
           const freshHtml = await res.text();
           if (freshHtml.length > 1e4 && !freshHtml.includes("cf-wrapper")) {

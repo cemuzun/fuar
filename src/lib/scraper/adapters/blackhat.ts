@@ -57,6 +57,22 @@ export class BlackhatAdapter implements ScraperAdapter {
       }
     };
 
+    let targetUrl = url;
+    if (targetUrl.includes('blackhat.com') && !targetUrl.includes('event-sponsors.html')) {
+      targetUrl = targetUrl.replace(/\/$/, '') + '/event-sponsors.html';
+      console.log(`[BlackhatAdapter] Target URL normalized to: ${targetUrl}`);
+    }
+
+    if (page && page.url() !== targetUrl) {
+      try {
+        await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 25000 });
+        await page.waitForTimeout(3000);
+        html = await page.content();
+      } catch (e: any) {
+        console.warn(`[BlackhatAdapter] Navigation to ${targetUrl} warning: ${e.message}`);
+      }
+    }
+
     // Step 1: Try to bypass Cloudflare by re-fetching with full browser headers
     let workingHtml = html;
     if (!html || html.includes('cf-wrapper') || html.includes('Cloudflare') || html.length < 5000) {
@@ -76,7 +92,7 @@ export class BlackhatAdapter implements ScraperAdapter {
           'Upgrade-Insecure-Requests': '1',
         };
 
-        const res = await fetch(url, { headers: bypassHeaders });
+        const res = await fetch(targetUrl, { headers: bypassHeaders });
         if (res.ok) {
           const freshHtml = await res.text();
           if (freshHtml.length > 10000 && !freshHtml.includes('cf-wrapper')) {
