@@ -421,7 +421,7 @@ app.post('/api/extract/directory', async (req, res) => {
             officialWebsite = officialWebsite.replace(/\/$/, '') + '/event-sponsors.html';
           }
           // Merge with saved DB state if present
-          const dbShow = Object.values(dbQueries.getAllShows() || {}).find(
+          const dbShow = (dbQueries.getAllTradeShows() || []).find(
             (s: any) => s.eventName === eventName || s.shortName === eventName || (s.officialWebsite && s.officialWebsite.includes('blackhat.com'))
           );
           const storedExhibitors = dbShow ? dbQueries.getExhibitorsForShow(dbShow.id) : [];
@@ -448,7 +448,7 @@ app.post('/api/extract/directory', async (req, res) => {
 
       console.log(`[Directory] USA: extracted ${events.length} events from Orbus`);
       if (events.length === 0) {
-        const savedShows = Object.values(dbQueries.getAllShows() || {});
+        const savedShows = dbQueries.getAllTradeShows() || [];
         console.log(`[Directory] Orbus returned 0, loading ${savedShows.length} saved shows from DB`);
         for (const s of savedShows as any[]) {
           const storedExhibitors = dbQueries.getExhibitorsForShow(s.id);
@@ -461,7 +461,7 @@ app.post('/api/extract/directory', async (req, res) => {
       }
       return res.json({ success: true, country: 'usa', countryName: 'United States', flag: '🇺🇸', totalCount: events.length, events });
     } catch (err: any) {
-      const savedShows = Object.values(dbQueries.getAllShows() || {});
+      const savedShows = dbQueries.getAllTradeShows() || [];
       if (savedShows.length > 0) {
         const events = savedShows.map((s: any) => {
           const storedExhibitors = dbQueries.getExhibitorsForShow(s.id);
