@@ -334,6 +334,153 @@ var ExpoPlatformAdapter = class {
   }
 };
 
+// src/lib/scraper/adapters/blackhat.ts
+var cheerio = __toESM(require("cheerio"), 1);
+var BlackhatAdapter = class {
+  constructor() {
+    this.name = "Blackhat";
+  }
+  detect(url, html) {
+    return url.includes("blackhat.com") || url.includes("blackhat.") || url.includes("event-sponsors") && (html.includes("blackhat") || html.includes("Black Hat"));
+  }
+  async discoverPages(url, html, page) {
+    return [];
+  }
+  async extractExhibitors(url, html, page, interceptedXhr, saveCheckpoint) {
+    const exhibitorsMap = /* @__PURE__ */ new Map();
+    const addExhibitor = (name, website, evidence = "HTML Element") => {
+      const cleanName = name.replace(/\s+/g, " ").trim();
+      if (!cleanName || cleanName.length < 2 || cleanName.length > 100) return;
+      const noise = /^(home|about|contact|register|login|search|sponsors|exhibitors|menu|schedule|agenda|speakers|venue|hotel|faq|news|press|blog|twitter|linkedin|facebook|instagram)$/i;
+      if (noise.test(cleanName)) return;
+      const key = cleanName.toLowerCase();
+      if (!exhibitorsMap.has(key)) {
+        exhibitorsMap.set(key, {
+          companyName: cleanName,
+          boothNumber: null,
+          profileUrl: null,
+          companyWebsite: website || null,
+          sourceUrl: url,
+          sourceEvidence: evidence,
+          extractionMethod: "deterministic",
+          confidence: 0.85
+        });
+      }
+    };
+    let workingHtml = html;
+    if (!html || html.includes("cf-wrapper") || html.includes("Cloudflare") || html.length < 5e3) {
+      console.log("[BlackhatAdapter] Cloudflare block detected, attempting bypass fetch...");
+      try {
+        const bypassHeaders = {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Accept-Encoding": "gzip, deflate, br",
+          "Cache-Control": "no-cache",
+          "Pragma": "no-cache",
+          "Referer": "https://www.google.com/",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "cross-site",
+          "Upgrade-Insecure-Requests": "1"
+        };
+        const res = await fetch(url, { headers: bypassHeaders });
+        if (res.ok) {
+          const freshHtml = await res.text();
+          if (freshHtml.length > 1e4 && !freshHtml.includes("cf-wrapper")) {
+            workingHtml = freshHtml;
+            console.log(`[BlackhatAdapter] Bypass fetch succeeded, HTML size: ${freshHtml.length} bytes`);
+          } else {
+            console.warn(`[BlackhatAdapter] Bypass fetch returned Cloudflare page or empty (${freshHtml.length} bytes)`);
+          }
+        }
+      } catch (e) {
+        console.error("[BlackhatAdapter] Bypass fetch failed:", e.message);
+      }
+    }
+    const $ = cheerio.load(workingHtml);
+    $("script, style, nav, header, footer, noscript, iframe").remove();
+    const sponsorSelectors = [
+      // Explicit sponsor containers
+      ".sponsor-logo",
+      ".sponsor-item",
+      ".sponsor-card",
+      ".sponsor-block",
+      ".sponsor-tile",
+      '[class*="sponsor"]',
+      // Exhibitor containers
+      ".exhibitor-logo",
+      ".exhibitor-item",
+      ".exhibitor-card",
+      '[class*="exhibitor"]',
+      // Company / partner containers
+      ".company-item",
+      ".company-card",
+      ".partner-item",
+      ".partner-logo",
+      '[class*="partner"]',
+      // Generic grid items containing logos
+      ".grid-item",
+      ".card",
+      ".logo-item",
+      ".tile"
+    ];
+    for (const selector of sponsorSelectors) {
+      $(selector).each((_, el) => {
+        const imgAlt = $(el).find("img[alt]").first().attr("alt") || "";
+        const heading = $(el).find("h2, h3, h4, h5, strong, b").first().text().trim();
+        const linkText = $(el).find("a").first().text().trim();
+        const elText = $(el).text().trim().split("\n")[0].trim();
+        const website = $(el).find("a[href]").first().attr("href") || null;
+        const name = imgAlt || heading || linkText || elText;
+        if (name && name.length >= 2 && name.length <= 100) {
+          addExhibitor(name, website, `CSS Selector: ${selector}`);
+        }
+      });
+    }
+    $("img[alt]").each((_, img) => {
+      const alt = ($(img).attr("alt") || "").trim();
+      if (alt.length >= 3 && alt.length <= 80 && !/^(logo|banner|image|photo|picture|icon|badge|sponsor logo|exhibitor logo|company logo|arrow|chevron|check|close|menu|header|footer)$/i.test(alt)) {
+        const parentLink = $(img).closest("a");
+        const website = parentLink.attr("href") || null;
+        addExhibitor(alt, website, "img[alt] Logo");
+      }
+    });
+    $("a[href]").each((_, a) => {
+      const href = $(a).attr("href") || "";
+      const text = $(a).text().trim();
+      if ((href.includes("/exhibitor/") || href.includes("/sponsor/") || href.includes("/company/") || href.includes("/partner/")) && text.length >= 2 && text.length <= 80) {
+        addExhibitor(text, href.startsWith("http") ? href : null, "Anchor exhibitor/sponsor link");
+      }
+    });
+    $("[data-company], [data-name], [data-exhibitor], [data-sponsor]").each((_, el) => {
+      const name = $(el).attr("data-company") || $(el).attr("data-name") || $(el).attr("data-exhibitor") || $(el).attr("data-sponsor") || "";
+      if (name.trim().length >= 2) {
+        addExhibitor(name.trim(), null, "data-* attribute");
+      }
+    });
+    $('script[type="application/ld+json"]').each((_, script) => {
+      try {
+        const json = JSON.parse($(script).html() || "{}");
+        const items = Array.isArray(json) ? json : [json];
+        for (const item of items) {
+          if (item.sponsor) {
+            const sponsors = Array.isArray(item.sponsor) ? item.sponsor : [item.sponsor];
+            for (const s of sponsors) {
+              if (s.name) addExhibitor(s.name, s.url || null, "JSON-LD sponsor");
+            }
+          }
+          if (item.organizer?.name) addExhibitor(item.organizer.name, item.organizer.url, "JSON-LD organizer");
+        }
+      } catch (e) {
+      }
+    });
+    const results = Array.from(exhibitorsMap.values());
+    console.log(`[BlackhatAdapter] Extracted ${results.length} companies from ${url}`);
+    return results;
+  }
+};
+
 // src/lib/scraper/index.ts
 var import_playwright = require("playwright");
 
@@ -373,7 +520,7 @@ var MapYourShowAdapter = class {
 };
 
 // src/lib/scraper/adapters/generic-deterministic.ts
-var cheerio = __toESM(require("cheerio"), 1);
+var cheerio2 = __toESM(require("cheerio"), 1);
 var EXCLUSION_PATTERNS = [
   /^home$/i,
   /^contact$/i,
@@ -393,11 +540,30 @@ var EXCLUSION_PATTERNS = [
   /^exhibitors$/i,
   /^search$/i,
   /^view all$/i,
-  /^back to top$/i
+  /^back to top$/i,
+  /^logo$/i,
+  /^banner$/i,
+  /^image$/i,
+  /^photo$/i,
+  /^icon$/i,
+  /^arrow$/i,
+  /^menu$/i,
+  /^navigation$/i,
+  /^header$/i,
+  /^footer$/i,
+  /^close$/i,
+  /^open$/i,
+  /^next$/i,
+  /^previous$/i,
+  /^submit$/i,
+  /^cancel$/i,
+  /^ok$/i,
+  /^yes$/i,
+  /^no$/i
 ];
 function isGeneric(text) {
   const trimmed = text.trim();
-  if (trimmed.length > 70 || trimmed.length < 2) return true;
+  if (trimmed.length > 80 || trimmed.length < 2) return true;
   for (const pattern of EXCLUSION_PATTERNS) {
     if (pattern.test(trimmed)) return true;
   }
@@ -415,8 +581,9 @@ var GenericDeterministicAdapter = class {
   }
   async extractExhibitors(url, html, page, interceptedXhr) {
     const exhibitorsMap = /* @__PURE__ */ new Map();
-    const $ = cheerio.load(html);
-    const addExhibitor = (name, booth = null, evidence = "HTML Element") => {
+    const $ = cheerio2.load(html);
+    $("script, style, nav, header, footer, noscript").remove();
+    const addExhibitor = (name, booth = null, evidence = "HTML Element", website) => {
       const cleanName = name.replace(/\s+/g, " ").trim();
       if (!cleanName || isGeneric(cleanName)) return;
       const key = cleanName.toLowerCase();
@@ -425,7 +592,7 @@ var GenericDeterministicAdapter = class {
           companyName: cleanName,
           boothNumber: booth ? booth.trim() : null,
           profileUrl: null,
-          companyWebsite: null,
+          companyWebsite: website || null,
           sourceUrl: url,
           sourceEvidence: evidence,
           extractionMethod: "deterministic",
@@ -444,13 +611,54 @@ var GenericDeterministicAdapter = class {
         }
       }
     });
-    $('.exhibitor-card, .exhibitor-item, .directory-item, .company-card, [class*="exhibitor"], [class*="directory-item"]').each((_, el) => {
-      const nameEl = $(el).find("h2, h3, h4, .name, .title, .company-name, strong, a").first();
-      const name = nameEl.text().trim();
-      const boothEl = $(el).find('.booth, .booth-number, [class*="booth"]').first();
-      const booth = boothEl.text().trim() || null;
-      if (name) {
-        addExhibitor(name, booth, "HTML Card Element");
+    const cardSelectors = [
+      ".exhibitor-card",
+      ".exhibitor-item",
+      ".exhibitor",
+      '[class*="exhibitor"]',
+      ".sponsor-card",
+      ".sponsor-item",
+      ".sponsor-logo",
+      ".sponsor-tile",
+      '[class*="sponsor"]',
+      ".company-card",
+      ".company-item",
+      '[class*="company"]',
+      ".directory-item",
+      '[class*="directory-item"]',
+      ".partner-card",
+      ".partner-item",
+      ".partner-logo",
+      '[class*="partner"]',
+      ".vendor-card",
+      ".vendor-item",
+      '[class*="vendor"]',
+      ".booth-card",
+      ".booth-item",
+      '[class*="booth-card"]',
+      ".grid-item",
+      ".card-item",
+      ".listing-item"
+    ];
+    for (const selector of cardSelectors) {
+      $(selector).each((_, el) => {
+        const imgAlt = $(el).find("img[alt]").first().attr("alt") || "";
+        const nameEl = $(el).find("h2, h3, h4, h5, .name, .title, .company-name, strong, a").first();
+        const name = imgAlt || nameEl.text().trim();
+        const boothEl = $(el).find('.booth, .booth-number, [class*="booth"]').first();
+        const booth = boothEl.text().trim() || null;
+        const website = $(el).find("a[href]").first().attr("href") || null;
+        if (name) {
+          addExhibitor(name, booth, `Card: ${selector}`, website);
+        }
+      });
+    }
+    $("img[alt]").each((_, img) => {
+      const alt = ($(img).attr("alt") || "").trim();
+      if (alt.length >= 3 && alt.length <= 80 && !isGeneric(alt)) {
+        const parentLink = $(img).closest("a");
+        const website = parentLink.attr("href") || null;
+        addExhibitor(alt, null, "img[alt] Logo", website && website.startsWith("http") ? website : null);
       }
     });
     $("ul li, ol li").each((_, li) => {
@@ -459,15 +667,22 @@ var GenericDeterministicAdapter = class {
       if (match && match[1]) {
         const name = match[1].trim();
         const booth = match[2] ? match[2].trim() : null;
-        if (name.length >= 3 && name.length <= 60 && !isGeneric(name)) {
+        if (name.length >= 3 && name.length <= 70 && !isGeneric(name)) {
           addExhibitor(name, booth, "List Item");
         }
       }
     });
-    $('a[href*="exhibitor"], a[href*="company"], a[href*="booth"]').each((_, a) => {
+    $('a[href*="exhibitor"], a[href*="company"], a[href*="booth"], a[href*="sponsor"], a[href*="partner"]').each((_, a) => {
       const text = $(a).text().trim();
-      if (text && text.length >= 3 && text.length <= 60 && !isGeneric(text)) {
-        addExhibitor(text, null, "Link Element");
+      const href = $(a).attr("href") || "";
+      if (text && text.length >= 3 && text.length <= 70 && !isGeneric(text)) {
+        addExhibitor(text, null, "Anchor Link", href.startsWith("http") ? href : null);
+      }
+    });
+    $("[data-company], [data-name], [data-exhibitor], [data-sponsor]").each((_, el) => {
+      const name = $(el).attr("data-company") || $(el).attr("data-name") || $(el).attr("data-exhibitor") || $(el).attr("data-sponsor") || "";
+      if (name.trim().length >= 2 && !isGeneric(name.trim())) {
+        addExhibitor(name.trim(), null, "data-* attribute");
       }
     });
     return Array.from(exhibitorsMap.values());
@@ -636,6 +851,8 @@ var adapters = [
   new ExpoFPAdapter(),
   new SwapcardAdapter(),
   new ExpoPlatformAdapter(),
+  new BlackhatAdapter(),
+  // Security conference / Cloudflare-protected sponsor pages
   new GenericDeterministicAdapter()
   // Fallback
 ];
@@ -697,19 +914,46 @@ var DirectoryScraper = class {
       htmlText = await page.content();
     } catch (e) {
       console.warn(`[Scraper] Playwright unavailable (${e.message}), attempting HTTP fetch fallback...`);
-      try {
-        const res = await fetch(url, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-          }
-        });
-        if (res.ok) {
-          htmlText = await res.text();
-          console.log(`[Scraper] HTTP fetch succeeded, HTML size: ${htmlText.length} bytes`);
+      const fetchAttempts = [
+        {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Referer": "https://www.google.com/",
+          "Cache-Control": "no-cache",
+          "Pragma": "no-cache",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "cross-site",
+          "Upgrade-Insecure-Requests": "1"
+        },
+        {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Referer": "https://www.bing.com/"
+        },
+        {
+          "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+          "Accept": "text/html,application/xhtml+xml"
         }
-      } catch (fetchErr) {
-        console.error(`[Scraper] HTTP fetch fallback failed:`, fetchErr.message);
+      ];
+      for (const headers of fetchAttempts) {
+        try {
+          const res = await fetch(url, { headers });
+          if (res.ok) {
+            const fetchedHtml = await res.text();
+            if (fetchedHtml.length > 5e3 && !fetchedHtml.includes("cf-wrapper")) {
+              htmlText = fetchedHtml;
+              console.log(`[Scraper] HTTP fetch succeeded, HTML size: ${htmlText.length} bytes`);
+              break;
+            } else {
+              console.warn(`[Scraper] Fetch returned Cloudflare/empty page (${fetchedHtml.length} bytes), trying next UA...`);
+            }
+          }
+        } catch (fetchErr) {
+          console.error(`[Scraper] HTTP fetch attempt failed:`, fetchErr.message);
+        }
       }
     }
     let selectedAdapter = adapters[adapters.length - 1];
@@ -750,7 +994,7 @@ var import_path2 = __toESM(require("path"), 1);
 var import_vite = require("vite");
 var import_dotenv = __toESM(require("dotenv"), 1);
 var import_nodemailer = __toESM(require("nodemailer"), 1);
-var cheerio2 = __toESM(require("cheerio"), 1);
+var cheerio3 = __toESM(require("cheerio"), 1);
 var fsLib = __toESM(require("fs"), 1);
 var pathLib = __toESM(require("path"), 1);
 function logScrapedContent(url, content, type = "html") {
@@ -923,7 +1167,7 @@ app.post("/api/extract/orbus", async (_req, res) => {
     }
     const pageHtml = await response.text();
     logScrapedContent(targetUrl, pageHtml, "html");
-    const $ = cheerio2.load(pageHtml);
+    const $ = cheerio3.load(pageHtml);
     let extractedEvents = [];
     $("tr.row").each((i, el) => {
       const ctry = $(el).find(".r-Ctry").text().trim();
@@ -1058,7 +1302,7 @@ app.post("/api/extract/directory", async (req, res) => {
       });
       if (!response.ok) throw new Error(`Orbus fetch failed: ${response.status}`);
       const pageHtml = await response.text();
-      const $ = cheerio2.load(pageHtml);
+      const $ = cheerio3.load(pageHtml);
       const events = [];
       $("tr.row").each((_, el) => {
         const ctry = $(el).find(".r-Ctry").text().trim();

@@ -2,6 +2,7 @@ import { A2ZAdapter } from './adapters/a2z.js';
 import { ExpoFPAdapter } from './adapters/expofp.js';
 import { SwapcardAdapter } from './adapters/swapcard.js';
 import { ExpoPlatformAdapter } from './adapters/expoplatform.js';
+import { BlackhatAdapter } from './adapters/blackhat.js';
 import { chromium, Page, Browser } from 'playwright';
 import { ScraperAdapter, ExhibitorData } from './types.js';
 import { MapYourShowAdapter } from './adapters/mapyourshow.js';
@@ -17,6 +18,7 @@ const adapters: ScraperAdapter[] = [
   new ExpoFPAdapter(),
   new SwapcardAdapter(),
   new ExpoPlatformAdapter(),
+  new BlackhatAdapter(),      // Security conference / Cloudflare-protected sponsor pages
   new GenericDeterministicAdapter() // Fallback
 ];
 
@@ -86,19 +88,47 @@ export class DirectoryScraper {
       htmlText = await page.content();
     } catch (e: any) {
       console.warn(`[Scraper] Playwright unavailable (${e.message}), attempting HTTP fetch fallback...`);
-      try {
-        const res = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+      // Try multiple user-agent / header combos to bypass Cloudflare/bot protection
+      const fetchAttempts = [
+        {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Referer': 'https://www.google.com/',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'cross-site',
+          'Upgrade-Insecure-Requests': '1',
+        },
+        {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Referer': 'https://www.bing.com/',
+        },
+        {
+          'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+          'Accept': 'text/html,application/xhtml+xml',
+        },
+      ];
+      for (const headers of fetchAttempts) {
+        try {
+          const res = await fetch(url, { headers });
+          if (res.ok) {
+            const fetchedHtml = await res.text();
+            if (fetchedHtml.length > 5000 && !fetchedHtml.includes('cf-wrapper')) {
+              htmlText = fetchedHtml;
+              console.log(`[Scraper] HTTP fetch succeeded, HTML size: ${htmlText.length} bytes`);
+              break;
+            } else {
+              console.warn(`[Scraper] Fetch returned Cloudflare/empty page (${fetchedHtml.length} bytes), trying next UA...`);
+            }
           }
-        });
-        if (res.ok) {
-          htmlText = await res.text();
-          console.log(`[Scraper] HTTP fetch succeeded, HTML size: ${htmlText.length} bytes`);
+        } catch (fetchErr: any) {
+          console.error(`[Scraper] HTTP fetch attempt failed:`, fetchErr.message);
         }
-      } catch (fetchErr: any) {
-        console.error(`[Scraper] HTTP fetch fallback failed:`, fetchErr.message);
       }
     }
     
