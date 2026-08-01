@@ -26124,6 +26124,139 @@
       "extractedExhibitorsCount": 28,
       "isUsa": true,
       "updatedAt": "2026-08-01T19:56:40.626Z"
+    },
+    "show-sema-show-2026": {
+      "id": "show-sema-show-2026",
+      "eventName": "SEMA Show 2026",
+      "shortName": "SEMA Show 2026",
+      "category": "Trade Show",
+      "city": "Las Vegas",
+      "state": "NV",
+      "country": "USA",
+      "venue": "",
+      "dates": "",
+      "month": "",
+      "year": 2026,
+      "orbusUrl": "",
+      "officialWebsite": "https://www.semashow.com",
+      "estimatedExhibitorsCount": 0,
+      "extractedExhibitorsCount": 3,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T22:58:52.378Z"
+    },
+    "show-infocomm-usa-2026": {
+      "id": "show-infocomm-usa-2026",
+      "eventName": "InfoComm USA 2026",
+      "shortName": "InfoComm USA 2026",
+      "category": "Trade Show",
+      "city": "Orlando",
+      "state": "FL",
+      "country": "USA",
+      "venue": "",
+      "dates": "",
+      "month": "",
+      "year": 2026,
+      "orbusUrl": "",
+      "officialWebsite": "https://www.infocommshow.org",
+      "estimatedExhibitorsCount": 0,
+      "extractedExhibitorsCount": 33,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T22:58:58.114Z"
+    },
+    "show-global-pet-expo-2026": {
+      "id": "show-global-pet-expo-2026",
+      "eventName": "Global Pet Expo 2026",
+      "shortName": "Global Pet Expo 2026",
+      "category": "Trade Show",
+      "city": "Orlando",
+      "state": "FL",
+      "country": "USA",
+      "venue": "",
+      "dates": "",
+      "month": "",
+      "year": 2026,
+      "orbusUrl": "",
+      "officialWebsite": "https://www.globalpetexpo.org",
+      "estimatedExhibitorsCount": 0,
+      "extractedExhibitorsCount": 9,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T22:59:03.356Z"
+    },
+    "show-academy-of-management-annual-meeting---aom": {
+      "id": "show-academy-of-management-annual-meeting---aom",
+      "eventName": "Academy of Management Annual Meeting - AOM",
+      "shortName": "Academy of Management Annual Meeting - AOM",
+      "category": "Trade Show",
+      "city": "Philadelphia",
+      "state": "PA",
+      "country": "USA",
+      "venue": "",
+      "dates": "",
+      "month": "",
+      "year": 2026,
+      "orbusUrl": "",
+      "officialWebsite": "https://www.aom.org/events/annual-meeting/aom-2026/",
+      "estimatedExhibitorsCount": 0,
+      "extractedExhibitorsCount": 16,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T22:59:08.117Z"
+    },
+    "show-dav--disabled-american-veterans-": {
+      "id": "show-dav--disabled-american-veterans-",
+      "eventName": "DAV (Disabled American Veterans)",
+      "shortName": "DAV (Disabled American Veterans)",
+      "category": "Trade Show",
+      "city": "Orlando",
+      "state": "FL",
+      "country": "USA",
+      "venue": "",
+      "dates": "",
+      "month": "",
+      "year": 2026,
+      "orbusUrl": "",
+      "officialWebsite": "https://www.dav.org/events/2026-national-convention/",
+      "estimatedExhibitorsCount": 0,
+      "extractedExhibitorsCount": 9,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T22:59:13.243Z"
+    },
+    "show-american-society-for-healthcare-engineering---ashe-health-care-facilities-innovation-conference": {
+      "id": "show-american-society-for-healthcare-engineering---ashe-health-care-facilities-innovation-conference",
+      "eventName": "American Society for Healthcare Engineering - ASHE Health Care Facilities Innovation Conference",
+      "shortName": "American Society for Healthcare Engineering - ASHE Health Care Facilities Innovation Conference",
+      "category": "Trade Show",
+      "city": "Minneapolis",
+      "state": "MN",
+      "country": "USA",
+      "venue": "",
+      "dates": "",
+      "month": "",
+      "year": 2026,
+      "orbusUrl": "",
+      "officialWebsite": "https://www.ashe.org/ashe-annual",
+      "estimatedExhibitorsCount": 0,
+      "extractedExhibitorsCount": 38,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T22:59:18.698Z"
+    },
+    "show-ny-now---new-york-international-gift-fair": {
+      "id": "show-ny-now---new-york-international-gift-fair",
+      "eventName": "NY NOW - New York International Gift Fair",
+      "shortName": "NY NOW - New York International Gift Fair",
+      "category": "Trade Show",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "venue": "",
+      "dates": "",
+      "month": "",
+      "year": 2026,
+      "orbusUrl": "",
+      "officialWebsite": "https://nynow.com/ny-now-summer-market-page/",
+      "estimatedExhibitorsCount": 0,
+      "extractedExhibitorsCount": 6,
+      "isUsa": true,
+      "updatedAt": "2026-08-01T22:59:24.282Z"
     }
   },
   "exhibitors": {
@@ -45329,6 +45462,1209 @@
         ]
       },
       "updated_at": "2026-08-01T18:24:39.135Z"
+    },
+    "https://www.semashow.com": {
+      "url": "https://www.semashow.com",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "SEMA Show logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.semashow.com",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "EXHIBIT",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.semashow.com",
+            "sourceEvidence": "Anchor Link",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Buy a Booth",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.semashow.com",
+            "sourceEvidence": "Anchor Link",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T22:58:52.368Z"
+    },
+    "https://www.infocommshow.org": {
+      "url": "https://www.infocommshow.org",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "IC26 Branded Triangle",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "avixa white logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Shure logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "ic26 logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "InfoComm | RESIDE | Lightapalooza",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Ashley Burt",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "George Cartwright",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Kris Cardenas",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Nathan Danek",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Erin Maher-Moran, CTS",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "José Mora",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Joshua McKinley",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Ariadna Santiago",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Phillip Rivera",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Michelle Loret",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "IC Stamp Logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "white infocomm logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Shure Empowering Collaboration. Removing Barriers.",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Audio Technica ad for Ceiling Array Microphone",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Blackmagicdesign ATEM Mini Extreme ISO G2",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Diversified ad",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "avixa logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Exhibit With Us",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Exhibit at InfoComm 2026!",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Reach the Broadcast AV Market",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Reach the Live Events Market",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Reach the Command & Control Market",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Exhibitor Opportunities",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Off-Floor Meeting Rooms",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "On-Floor Meeting Rooms",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Book an Audio Demo Room",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Host a Pro Training Session",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          },
+          {
+            "companyName": "Current Exhibitor Info",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.infocommshow.org",
+            "sourceEvidence": "MapYourShow DOM Element",
+            "extractionMethod": "deterministic",
+            "confidence": 0.85
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T22:58:58.100Z"
+    },
+    "https://www.globalpetexpo.org": {
+      "url": "https://www.globalpetexpo.org",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "Best in Show Awards",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Judd-Cover",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Global-Pet-Expo-Networking",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "GPE25-Education-Ingrid-1-1-1",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Manufacturer Sales Rep-1",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Buyers",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://globalpetexpo.org/attend?hsLang=en",
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Suppliers",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://globalpetexpo.org/supplier-pavilion?hsLang=en",
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Media",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://globalpetexpo.org/media?hsLang=en",
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "SeanWelcome_Orlandowall",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.globalpetexpo.org",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T22:59:03.348Z"
+    },
+    "https://www.aom.org/events/annual-meeting/aom-2026/": {
+      "url": "https://www.aom.org/events/annual-meeting/aom-2026/",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "Careers (CAR)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Conflict Management (CM)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Critical Management Studies (CMS)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Human Resources (HR)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Management Education and Development (MED)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "New Doctoral Student Consortium (NDSC)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Operations and Supply Chain Management (OSCM)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "AOM Publications (PUBS)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Strategic Management (STR)",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Spinner: White decorative",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "AOM 2026 Annual Meeting",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Loews Philadelphia 1200 Market Street Philadelphia, PA, 19107",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.aom.org/events/annual-meeting/registering-and-attending/hotel-accommodations/",
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Philadelphia Marriott Downtown 1201 Market Street Philadelphia, PA, 19107",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.aom.org/events/annual-meeting/registering-and-attending/hotel-accommodations/",
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Sheraton Philadelphia 201 North 17th Street Philadelphia, PA, 19103",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.aom.org/events/annual-meeting/registering-and-attending/hotel-accommodations/",
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Pennsylvania Convention Center, 1101 Arch Street Philadelphia, PA 19107",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.aom.org/events/annual-meeting/registering-and-attending/hotel-accommodations/",
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Members at AOM 2025",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.aom.org/events/annual-meeting/aom-2026/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T22:59:08.110Z"
+    },
+    "https://www.dav.org/events/2026-national-convention/": {
+      "url": "https://www.dav.org/events/2026-national-convention/",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "Member Registration",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Disabled American Veterans",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.dav.org",
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "dot image pixel",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Print",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Facebook",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "LinkedIn",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Email",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "No Resort Fee",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Complimentary Wi-Fi in guestrooms and public areas.",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.dav.org/events/2026-national-convention/",
+            "sourceEvidence": "List Item",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T22:59:13.232Z"
+    },
+    "https://www.ashe.org/ashe-annual": {
+      "url": "https://www.ashe.org/ashe-annual",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "header-logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Health Care Facilities Innovation Conference August 2-5 2026, Minneapolis Logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "blurry wide shot of entrance hallway with welcome sign and people walking",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "man standing holding microphone",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "two woman standing and networking at a conference",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "two men smiling looking at camera smiling standing in exhibit hall",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "white gear icon on navy background",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "white hands in circle icon on light blue background",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "white magnifying glass icon on green background",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "white buildling block icon on gold background",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "CORE Competency Framework Logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://web.cvent.com/event/4c77687e-8689-4626-874c-1786d8ff7c55/websitePage:bb5289cb-ccab-4615-8b68-c59e90ba2a07",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "icon of paper",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "icon of building",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "icon of speaker podium",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "icon of team of people",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "icon of navigation compass",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "icon of announcement speaker",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "schedule",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "engaging",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "networking",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "lightbulb on top of stack of books with blue color overlay",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "hot air balloon floating above hills with green color overlay",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "man standing and smiling in exhibit hall",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "three people standing and talking while looking at laptop on table",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "man standing wearing VR goggles and holding controller in hands in front of him",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Brightly",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.brightlysoftware.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Carrier",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.carrier.com/us/en/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "ENFRA",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://enfrasolutions.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "environ",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://environenergy.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Gordian",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.gordian.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Grainger logo",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.grainger.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Hexmodal",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.hexmodal.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Siemens",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.siemens.com/en-us/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Specified Technologies",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.stifirestop.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "STARC systems",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://starcsystems.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Trane",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.trane.com/content/microsites/trane-index/en.html",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Zurn Elkay",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://zurnelkay.com/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Sponsorship Opportunities",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": "https://www.ashemarketingsolutions.org/events/health-care-facilities-innovation-conference/sponsorship-opportunities/",
+            "sourceUrl": "https://www.ashe.org/ashe-annual",
+            "sourceEvidence": "Anchor Link",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T22:59:18.689Z"
+    },
+    "https://nynow.com/ny-now-summer-market-page/": {
+      "url": "https://nynow.com/ny-now-summer-market-page/",
+      "data": {
+        "status": "completed",
+        "exhibitors": [
+          {
+            "companyName": "Sun, Aug 2 – Mon, Aug 3",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://nynow.com/ny-now-summer-market-page/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Tues, Aug 4",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://nynow.com/ny-now-summer-market-page/",
+            "sourceEvidence": "HTML Table Row",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "A woman wears bracelets",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://nynow.com/ny-now-summer-market-page/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Two wine glasses with outdoor light",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://nynow.com/ny-now-summer-market-page/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "Many golden rings on a rock",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://nynow.com/ny-now-summer-market-page/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          },
+          {
+            "companyName": "People sitting around giving a talk",
+            "boothNumber": null,
+            "profileUrl": null,
+            "companyWebsite": null,
+            "sourceUrl": "https://nynow.com/ny-now-summer-market-page/",
+            "sourceEvidence": "img[alt] Logo",
+            "extractionMethod": "deterministic",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "updated_at": "2026-08-01T22:59:24.270Z"
     }
   }
 }
