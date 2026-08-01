@@ -55,8 +55,23 @@ export class DirectoryScraper {
     const interceptedXhr: { url: string, json: any }[] = [];
     
     try {
-      browser = await chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'] });
-      page = await browser.newPage();
+      browser = await chromium.launch({
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--disable-blink-features=AutomationControlled'
+        ]
+      });
+      const context = await browser.newContext({
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        viewport: { width: 1440, height: 900 }
+      });
+      page = await context.newPage();
+      await page.addInitScript(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+      });
 
       await page.setExtraHTTPHeaders({
         'Accept-Language': 'en-US,en;q=0.9',
@@ -78,13 +93,12 @@ export class DirectoryScraper {
       });
 
       try {
-        await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForTimeout(4000);
       } catch (e) {
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
         await page.waitForTimeout(3000);
       }
 
-      await page.waitForTimeout(2000);
       htmlText = await page.content();
     } catch (e: any) {
       console.warn(`[Scraper] Playwright unavailable (${e.message}), attempting HTTP fetch fallback...`);

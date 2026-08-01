@@ -39,8 +39,8 @@ export class BlackhatAdapter implements ScraperAdapter {
     const addExhibitor = (name: string, website?: string | null, evidence: string = 'HTML Element') => {
       const cleanName = name.replace(/\s+/g, ' ').trim();
       if (!cleanName || cleanName.length < 2 || cleanName.length > 100) return;
-      // Filter out nav/UI noise
-      const noise = /^(home|about|contact|register|login|search|sponsors|exhibitors|menu|schedule|agenda|speakers|venue|hotel|faq|news|press|blog|twitter|linkedin|facebook|instagram)$/i;
+      // Filter out nav/UI/footer noise
+      const noise = /^(home|about|contact|register|login|search|sponsors|exhibitors|menu|schedule|agenda|speakers|venue|hotel|faq|news|press|blog|twitter|x\/twitter|linkedin|facebook|instagram|address|privacy policy|terms of use|terms|conditions|copyright|all rights reserved|back to top|cookie policy)$/i;
       if (noise.test(cleanName)) return;
       const key = cleanName.toLowerCase();
       if (!exhibitorsMap.has(key)) {

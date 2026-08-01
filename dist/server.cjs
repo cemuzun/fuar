@@ -351,7 +351,7 @@ var BlackhatAdapter = class {
     const addExhibitor = (name, website, evidence = "HTML Element") => {
       const cleanName = name.replace(/\s+/g, " ").trim();
       if (!cleanName || cleanName.length < 2 || cleanName.length > 100) return;
-      const noise = /^(home|about|contact|register|login|search|sponsors|exhibitors|menu|schedule|agenda|speakers|venue|hotel|faq|news|press|blog|twitter|linkedin|facebook|instagram)$/i;
+      const noise = /^(home|about|contact|register|login|search|sponsors|exhibitors|menu|schedule|agenda|speakers|venue|hotel|faq|news|press|blog|twitter|x\/twitter|linkedin|facebook|instagram|address|privacy policy|terms of use|terms|conditions|copyright|all rights reserved|back to top|cookie policy)$/i;
       if (noise.test(cleanName)) return;
       const key = cleanName.toLowerCase();
       if (!exhibitorsMap.has(key)) {
@@ -884,8 +884,23 @@ var DirectoryScraper = class {
     let htmlText = "";
     const interceptedXhr = [];
     try {
-      browser = await import_playwright.chromium.launch({ args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"] });
-      page = await browser.newPage();
+      browser = await import_playwright.chromium.launch({
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-gpu",
+          "--disable-blink-features=AutomationControlled"
+        ]
+      });
+      const context = await browser.newContext({
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        viewport: { width: 1440, height: 900 }
+      });
+      page = await context.newPage();
+      await page.addInitScript(() => {
+        Object.defineProperty(navigator, "webdriver", { get: () => void 0 });
+      });
       await page.setExtraHTTPHeaders({
         "Accept-Language": "en-US,en;q=0.9",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
@@ -905,12 +920,11 @@ var DirectoryScraper = class {
         }
       });
       try {
-        await page.goto(url, { waitUntil: "networkidle", timeout: 3e4 });
+        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 3e4 });
+        await page.waitForTimeout(4e3);
       } catch (e) {
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 2e4 });
         await page.waitForTimeout(3e3);
       }
-      await page.waitForTimeout(2e3);
       htmlText = await page.content();
     } catch (e) {
       console.warn(`[Scraper] Playwright unavailable (${e.message}), attempting HTTP fetch fallback...`);
