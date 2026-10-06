@@ -3,7 +3,8 @@ import * as cheerio from 'cheerio';
 
 const EXCLUSION_PATTERNS = [
   /^home$/i, /^contact$/i, /^about us$/i, /^register$/i, /^login$/i, /^privacy$/i, /^terms$/i,
-  /^new products?$/i, /^welding machines?$/i, /^register as a visitor$/i,
+  /^new products?$/i, /^welding machines?(\/equipment)?$/i, /^register as a visitor$/i,
+  /^tech solutions$/i,
   /^product categories$/i, /^equipment categories$/i, /^service$/i, /^event names$/i,
   /^sponsors$/i, /^exhibitors$/i, /^search$/i, /^view all$/i, /^back to top$/i,
   /^logo$/i, /^banner$/i, /^image$/i, /^photo$/i, /^icon$/i, /^arrow$/i,

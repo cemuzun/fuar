@@ -1,12 +1,13 @@
 export interface DecisionMaker {
   id: string;
+  exhibitorId?: string;
   name: string;
   firstName?: string;
   lastName?: string;
   title: string;
   department: string;
   email: string;
-  emailConfidence: 'Verified' | 'Likely' | 'Pattern Generated';
+  emailConfidence: 'Verified' | 'Likely' | 'Pattern Generated' | 'Verified Domain Pattern';
   emailStatus?: 'Valid' | 'Bounced' | 'Unknown';
   phone: string;
   linkedinUrl?: string;
@@ -15,6 +16,7 @@ export interface DecisionMaker {
 
 export interface ExhibitorCompany {
   id: string;
+  showId?: string;
   companyName: string;
   tradeShowName: string;
   tradeShowCity: string;
